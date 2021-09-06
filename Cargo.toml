@@ -7,3 +7,4 @@ edition = "2018"
 
 [dependencies]
 dsp-tool-box-rs = { git = "http://gitea.fritz.box/hansen-audio/dsp-tool-box-rs.git", branch = "master"}
+num = "0.4.0"
