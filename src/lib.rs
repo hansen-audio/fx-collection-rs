@@ -1,7 +1,5 @@
 // Copyright(c) 2021 Hansen Audio.
 
-use dsp_tool_box_rs;
-
 type RealType = f32;
 
 pub mod trance_gate;

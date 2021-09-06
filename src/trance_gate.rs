@@ -3,8 +3,6 @@
 use dsp_tool_box_rs;
 use dsp_tool_box_rs::filtering::one_pole_filter::{self as contour_filter, tau_to_pole};
 use dsp_tool_box_rs::modulation::phase as mod_phase;
-use num::clamp;
-use std::cmp;
 
 use crate::RealType;
 
@@ -47,7 +45,7 @@ type AudioFrame = [RealType; NUM_CHANNELS_SSE];
 
 pub struct Context {
     channel_steps_list: ChannelStepsList,
-    contour_filter: ContourFiltersList,
+    contour_filters: ContourFiltersList,
     delay_phase: mod_phase::Context,
     fade_in_phase: mod_phase::Context,
     step_phase: mod_phase::Context,
@@ -69,7 +67,7 @@ impl Context {
     pub fn new() -> Self {
         let mut new_obj = Self {
             channel_steps_list: [[0.; MAX_NUM_STEPS]; NUM_CHANNELS],
-            contour_filter: [
+            contour_filters: [
                 contour_filter::Context::new(0.9),
                 contour_filter::Context::new(0.9),
             ],
@@ -125,8 +123,8 @@ impl Context {
     }
 
     pub fn trigger(&mut self, delay_len: RealType, fade_in_len: RealType) {
-        //self.set_delay();
-        //self.set_fade_in();
+        self.set_delay(delay_len);
+        self.set_fade_in(fade_in_len);
 
         self.delay_phase_val = 0.;
         self.fade_in_phase_val = 0.;
@@ -144,7 +142,7 @@ impl Context {
             false => 0.,
         };
 
-        self.contour_filter
+        self.contour_filters
             .iter_mut()
             .for_each(|item| item.reset(reset_val));
     }
@@ -159,8 +157,20 @@ impl Context {
             return;
         }
 
-        let mut values_le = self.channel_steps_list[L][self.step_val.pos];
-        let mut values_re = self.channel_steps_list[self.ch][self.step_val.pos];
+        let mut value_le = self.channel_steps_list[L][self.step_val.pos];
+        let mut value_ri = self.channel_steps_list[self.ch][self.step_val.pos];
+
+        apply_shuffle(&mut value_le, &mut value_ri, self.step_phase_val, self);
+        apply_width(&mut value_le, &mut value_ri, self.width);
+        apply_contour(&mut value_le, &mut value_ri, &mut self.contour_filters);
+        let tmp_mix = match self.is_fade_in_active {
+            true => self.mix * self.fade_in_phase_val,
+            false => self.mix,
+        };
+        apply_mix_stereo(&mut value_le, &mut value_ri, tmp_mix);
+
+        outputs[L] = inputs[L] * value_le;
+        outputs[R] = inputs[R] * value_ri;
     }
 
     pub fn update_phases(&mut self) {
@@ -186,7 +196,7 @@ impl Context {
         self.sample_rate = value;
 
         let contour = self.contour;
-        self.contour_filter.iter_mut().for_each(|item| {
+        self.contour_filters.iter_mut().for_each(|item| {
             let pole = tau_to_pole(contour, value);
             item.update_pole(pole);
         });
@@ -222,7 +232,7 @@ impl Context {
     }
 
     pub fn set_step_count(&mut self, value: usize) {
-        self.step_val.count = clamp(value, MIN_NUM_STEPS, MAX_NUM_STEPS);
+        self.step_val.count = value.clamp(MIN_NUM_STEPS, MAX_NUM_STEPS);
     }
 
     pub fn set_contour(&mut self, value_secs: RealType) {
@@ -232,7 +242,7 @@ impl Context {
 
         self.contour = value_secs;
         let contour = self.contour;
-        self.contour_filter.iter_mut().for_each(|item| {
+        self.contour_filters.iter_mut().for_each(|item| {
             let pole = tau_to_pole(contour, value_secs);
             item.update_pole(pole);
         });
@@ -255,11 +265,15 @@ impl Context {
 
         self.delay_phase.set_note_len(value);
     }
+
+    pub fn set_mix(&mut self, value: RealType) {
+        self.mix = value;
+    }
 }
 
 fn apply_width(value_le: &mut RealType, value_ri: &mut RealType, width: RealType) {
-    //value_le = cmp::max(value_le, value_ri * width);
-    //value_ri = cmp::max(value_ri, value_le * width);
+    *value_le = value_le.max(*value_le * width);
+    *value_ri = value_ri.max(*value_ri * width);
 }
 
 fn apply_mix(value: &mut RealType, mix: RealType) {
@@ -300,20 +314,20 @@ fn apply_shuffle(
     value_le: &mut RealType,
     value_ri: &mut RealType,
     phase_value: RealType,
-    cx: &Context,
+    context: &Context,
 ) {
     // TODO: Is this a good value for a MAX_DELAY?
     const MAX_DELAY: RealType = 3. / 4.;
-    let delay = cx.shuffle * MAX_DELAY;
+    let delay = context.shuffle * MAX_DELAY;
 
-    if cx.step_val.is_shuffle {
+    if context.step_val.is_shuffle {
         apply_gate_delay(value_le, value_ri, phase_value, delay);
     }
 }
 
-fn set_shuffle(s: &Step, note_len: RealType) {
+fn set_shuffle(_step: &Step, _note_len: RealType) {
     todo!("set_shuffle");
-    // s.is_shuffle = detail::is_shuffle_note(s.pos, note_len);
+    // step.is_shuffle = detail::is_shuffle_note(s.pos, note_len);
 }
 
 #[cfg(test)]
