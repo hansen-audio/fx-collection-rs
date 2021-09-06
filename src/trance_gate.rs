@@ -36,7 +36,7 @@ const MIN_NUM_STEPS: usize = 1;
 const MAX_NUM_STEPS: usize = 32;
 const L: usize = 0;
 const R: usize = 1;
-const ONE_SAMPLE: i32 = 1;
+const ONE_SAMPLE: usize = 1;
 
 type StepValues = [RealType; MAX_NUM_STEPS];
 type ChannelStepsList = [StepValues; NUM_CHANNELS];
