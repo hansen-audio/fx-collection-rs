@@ -20,3 +20,7 @@ no_includes = true
 # A list of sys headers to #include (with angle brackets)
 # default: []
 sys_includes = ["cstdint"]
+
+# An optional list of namespaces to output around the generated bindings
+# default: []
+namespaces = ["ha", "fx_collection_rs", "trance_gate"]
