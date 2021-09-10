@@ -167,7 +167,7 @@ impl Context {
             .delay_phase
             .advance_one_shot(&mut self.delay_phase_val, ONE_SAMPLE);
 
-        if is_overflow {
+        if !is_overflow {
             outputs.copy_from_slice(inputs);
             return;
         }
@@ -259,8 +259,9 @@ impl Context {
 
         self.contour = value_secs;
         let contour = self.contour;
+        let sample_rate = self.sample_rate;
         self.contour_filters.iter_mut().for_each(|item| {
-            let pole = tau_to_pole(contour, value_secs);
+            let pole = tau_to_pole(contour, sample_rate);
             item.update_pole(pole);
         });
     }
