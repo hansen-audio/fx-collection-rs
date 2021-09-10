@@ -12,5 +12,4 @@ cbindgen = "0.20.0"
 crate-type = ["staticlib"]
 
 [dependencies]
-# dsp-tool-box-rs = { git = "http://gitea.fritz.box/hansen-audio/dsp-tool-box-rs.git", branch = "master"}
-dsp-tool-box-rs = { path = "/home/rene/Developer/gitea/hansen-audio/dsp-tool-box-rs"}
+dsp-tool-box-rs = { git = "https://github.com/hansen-audio/dsp-tool-box-rs.git", branch = "master"}
