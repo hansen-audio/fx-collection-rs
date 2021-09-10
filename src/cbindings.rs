@@ -2,17 +2,20 @@
 
 use crate::{trance_gate, AudioFrame, RealType};
 
+//-----------------------------------------------------------------------------
+// https://firefox-source-docs.mozilla.org/writing-rust-code/ffi.html
 #[no_mangle]
-pub unsafe extern "C" fn new_context(
-    tg_context: *const trance_gate::Context,
-) -> *mut trance_gate::Context {
-    Box::into_raw(Box::new((*tg_context).new_context()))
+pub unsafe extern "C" fn tg_create() -> *mut trance_gate::Context {
+    let tg_context = trance_gate::Context::new();
+    Box::into_raw(Box::new(tg_context))
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn free_context(tg_context: *mut trance_gate::Context) {
-    let _ = Box::from_raw(tg_context);
+pub unsafe extern "C" fn tg_destroy(tg_context: *mut trance_gate::Context) {
+    drop(Box::from_raw(tg_context));
 }
+
+//-----------------------------------------------------------------------------
 
 #[no_mangle]
 pub unsafe extern "C" fn set_tempo(context: &mut trance_gate::Context, tempo_bpm: RealType) {
