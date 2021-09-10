@@ -4,11 +4,10 @@ use dsp_tool_box_rs;
 use dsp_tool_box_rs::filtering::one_pole_filter::{self as contour_filter, tau_to_pole};
 use dsp_tool_box_rs::modulation::phase as mod_phase;
 
-use crate::shuffle_note::is_shuffle_note;
+use crate::detail::shuffle_note::is_shuffle_note;
 use crate::RealType;
 
 /// A step is represented by a position, a step count and the shuffle option.
-//#[repr(C)]
 pub struct Step {
     pos: usize,
     count: usize,
@@ -45,7 +44,6 @@ type ChannelStepsList = [StepValues; NUM_CHANNELS];
 type ContourFiltersList = [contour_filter::Context; NUM_CHANNELS];
 type AudioFrame = [RealType; NUM_CHANNELS_SSE];
 
-// #[repr(C)]
 pub struct Context {
     channel_steps_list: ChannelStepsList,
     contour_filters: ContourFiltersList,

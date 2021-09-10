@@ -28,7 +28,7 @@ fn is_even(value: usize, divider: usize) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use crate::{shuffle_note::is_shuffle_note, RealType};
+    use crate::{detail::shuffle_note::is_shuffle_note, RealType};
 
     #[test]
     fn tests_is_shuffle_note_16() {
