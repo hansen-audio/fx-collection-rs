@@ -142,6 +142,7 @@ impl Context {
             self.reset();
         }
     }
+
     pub fn reset(&mut self) {
         let reset_val = match self.is_delay_active {
             true => 1.,
@@ -151,6 +152,14 @@ impl Context {
         self.contour_filters
             .iter_mut()
             .for_each(|item| item.reset(reset_val));
+    }
+
+    pub fn reset_step_pos(&mut self, value: usize) {
+        self.step_val.pos = value;
+    }
+
+    pub fn get_step_pos(&mut self) -> usize {
+        self.step_val.pos
     }
 
     pub fn process(&mut self, inputs: &AudioFrame, outputs: &mut AudioFrame) {

@@ -34,6 +34,16 @@ pub unsafe extern "C" fn reset(context: &mut trance_gate::Context) {
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn reset_step_pos(context: &mut trance_gate::Context, value: usize) {
+    context.reset_step_pos(value);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn get_step_pos(context: &mut trance_gate::Context) -> usize {
+    context.get_step_pos()
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn process(
     context: &mut trance_gate::Context,
     inputs: &AudioFrame,
