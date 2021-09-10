@@ -39,7 +39,6 @@ For the trance gate for instance, use the ```trance_gate::Context::new()``` meth
 #### Processing an effect
 
 TODO
-```
 
 ## License
 
