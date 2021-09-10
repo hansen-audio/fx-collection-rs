@@ -22,8 +22,8 @@ fn is_odd(value: usize, divider: usize) -> bool {
     value % divider != 0
 }
 
-fn is_even(value: usize, devider: usize) -> bool {
-    !is_odd(value, devider)
+fn is_even(value: usize, divider: usize) -> bool {
+    !is_odd(value, divider)
 }
 
 #[cfg(test)]
