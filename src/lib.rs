@@ -4,6 +4,7 @@ pub type RealType = f32;
 pub type AudioFrame = [RealType; 4];
 
 pub mod cbindings;
+pub mod shuffle_note;
 pub mod trance_gate;
 
 #[cfg(test)]

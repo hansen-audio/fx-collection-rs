@@ -4,6 +4,7 @@ use dsp_tool_box_rs;
 use dsp_tool_box_rs::filtering::one_pole_filter::{self as contour_filter, tau_to_pole};
 use dsp_tool_box_rs::modulation::phase as mod_phase;
 
+use crate::shuffle_note::is_shuffle_note;
 use crate::RealType;
 
 /// A step is represented by a position, a step count and the shuffle option.
@@ -202,7 +203,7 @@ impl Context {
             return;
         }
         self.step_val.inc();
-        set_shuffle(&self.step_val, self.step_phase.get_note_len());
+        set_shuffle(&mut self.step_val, self.step_phase.get_note_len());
     }
 
     pub fn set_sample_rate(&mut self, value: RealType) {
@@ -343,9 +344,9 @@ fn apply_shuffle(
     }
 }
 
-fn set_shuffle(_step: &Step, _note_len: RealType) {
-    todo!("set_shuffle");
-    // step.is_shuffle = detail::is_shuffle_note(s.pos, note_len);
+fn set_shuffle(step: &mut Step, note_len: RealType) {
+    let pos = step.pos;
+    step.is_shuffle = is_shuffle_note(pos, note_len);
 }
 
 #[cfg(test)]
