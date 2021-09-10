@@ -67,10 +67,6 @@ pub struct Context {
 }
 
 impl Context {
-    pub fn new_context(&'static self) -> Context {
-        Context::new()
-    }
-
     pub fn new() -> Self {
         let mut new_self = Self {
             channel_steps_list: [[0.; MAX_NUM_STEPS]; NUM_CHANNELS],
