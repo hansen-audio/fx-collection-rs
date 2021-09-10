@@ -67,7 +67,7 @@ pub struct Context {
 }
 
 impl Context {
-    pub fn new_decoder(&'static self) -> Context {
+    pub fn new_context(&'static self) -> Context {
         Context::new()
     }
 

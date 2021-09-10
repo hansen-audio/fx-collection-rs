@@ -6,7 +6,7 @@ use crate::{trance_gate, AudioFrame, RealType};
 pub unsafe extern "C" fn new_context(
     tg_context: *const trance_gate::Context,
 ) -> *mut trance_gate::Context {
-    Box::into_raw(Box::new((*tg_context).new_decoder()))
+    Box::into_raw(Box::new((*tg_context).new_context()))
 }
 
 #[no_mangle]
