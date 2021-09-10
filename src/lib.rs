@@ -1,7 +1,9 @@
 // Copyright(c) 2021 Hansen Audio.
 
-type RealType = f32;
+pub type RealType = f32;
+pub type AudioFrame = [RealType; 4];
 
+pub mod cbindings;
 pub mod trance_gate;
 
 #[cfg(test)]

@@ -6,7 +6,8 @@ use dsp_tool_box_rs::modulation::phase as mod_phase;
 
 use crate::RealType;
 
-/// A step is represnted by a position, a step count and the shuffle option.
+/// A step is represented by a position, a step count and the shuffle option.
+//#[repr(C)]
 pub struct Step {
     pos: usize,
     count: usize,
@@ -43,6 +44,7 @@ type ChannelStepsList = [StepValues; NUM_CHANNELS];
 type ContourFiltersList = [contour_filter::Context; NUM_CHANNELS];
 type AudioFrame = [RealType; NUM_CHANNELS_SSE];
 
+// #[repr(C)]
 pub struct Context {
     channel_steps_list: ChannelStepsList,
     contour_filters: ContourFiltersList,
@@ -64,8 +66,12 @@ pub struct Context {
 }
 
 impl Context {
+    pub fn new_decoder(&'static self) -> Context {
+        Context::new()
+    }
+
     pub fn new() -> Self {
-        let mut new_obj = Self {
+        let mut new_self = Self {
             channel_steps_list: [[0.; MAX_NUM_STEPS]; NUM_CHANNELS],
             contour_filters: [
                 contour_filter::Context::new(0.9),
@@ -90,30 +96,31 @@ impl Context {
 
         const INIT_NOTE_LEN: RealType = 1. / 32.;
 
-        new_obj
+        new_self
             .delay_phase
             .set_rate(mod_phase::note_length_to_rate(INIT_NOTE_LEN));
-        new_obj
+        new_self
             .delay_phase
             .set_sync_mode(mod_phase::SyncMode::ProjectSync);
 
-        new_obj
+        new_self
             .fade_in_phase
             .set_rate(mod_phase::note_length_to_rate(INIT_NOTE_LEN));
-        new_obj
+        new_self
             .fade_in_phase
             .set_sync_mode(mod_phase::SyncMode::ProjectSync);
 
-        new_obj
+        new_self
             .step_phase
             .set_rate(mod_phase::note_length_to_rate(INIT_NOTE_LEN));
-        new_obj
+        new_self
             .step_phase
             .set_sync_mode(mod_phase::SyncMode::ProjectSync);
 
         const TEMPO_BPM: RealType = 120.;
-        new_obj.set_tempo(TEMPO_BPM);
-        new_obj
+        new_self.set_tempo(TEMPO_BPM);
+
+        new_self
     }
 
     pub fn set_tempo(&mut self, tempo_bpm: RealType) {
@@ -135,7 +142,6 @@ impl Context {
             self.reset();
         }
     }
-
     pub fn reset(&mut self) {
         let reset_val = match self.is_delay_active {
             true => 1.,
@@ -171,9 +177,11 @@ impl Context {
 
         outputs[L] = inputs[L] * value_le;
         outputs[R] = inputs[R] * value_ri;
+
+        self.update_phases()
     }
 
-    pub fn update_phases(&mut self) {
+    fn update_phases(&mut self) {
         self.fade_in_phase
             .advance_one_shot(&mut self.fade_in_phase_val, ONE_SAMPLE);
 
