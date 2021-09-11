@@ -1,5 +1,7 @@
 # FX Colletion Library for Rust
 
+[![Rust](https://github.com/hansen-audio/fx-collection-rs/actions/workflows/rust.yml/badge.svg)](https://github.com/hansen-audio/fx-collection-rs/actions/workflows/rust.yml)
+
 ## Summary
 
 The ```fx-collection``` library combines basic modules from ```dsp-tool-box-rs``` to audio effects. The trance gate effect for example uses three modulation phases and a one pole filter from the ```dsp-tool-box-rs```. 
