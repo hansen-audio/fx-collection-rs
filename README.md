@@ -4,7 +4,7 @@
 
 ## Summary
 
-The ```fx-collection-fx``` library combines basic modules from ```dsp-tool-box-rs``` to audio effects. The trance gate effect for example uses three modulation phases and a one pole filter from the ```dsp-tool-box-rs```. 
+The ```fx-collection-rs``` library combines basic modules from ```dsp-tool-box-rs``` to audio effects. The trance gate effect for example uses three modulation phases and a one pole filter from the ```dsp-tool-box-rs```. 
 
 ### Dependency map
 
