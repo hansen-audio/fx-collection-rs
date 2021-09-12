@@ -11,7 +11,7 @@ mod trance_gate;
 mod tests {
     #[test]
     fn it_works() {
-        dsp_tool_box_rs::modulation::phase::Context::new();
+        dsp_tool_box_rs::modulation::phase::PhaseContext::new();
         assert_eq!(2 + 2, 4);
     }
 }

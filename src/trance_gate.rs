@@ -1,13 +1,12 @@
 // Copyright(c) 2021 Hansen Audio.
 
 use dsp_tool_box_rs;
-use dsp_tool_box_rs::filtering::one_pole_filter::{self as contour_filter, tau_to_pole};
-use dsp_tool_box_rs::modulation::phase as mod_phase;
 
 use crate::detail::shuffle_note::is_shuffle_note;
 use crate::RealType;
 
 /// A step is represented by a position, a step count and the shuffle option.
+// #[repr(C)]
 pub struct Step {
     pos: usize,
     count: usize,
@@ -41,15 +40,17 @@ const ONE_SAMPLE: usize = 1;
 
 type StepValues = [RealType; MAX_NUM_STEPS];
 type ChannelStepsList = [StepValues; NUM_CHANNELS];
-type ContourFiltersList = [contour_filter::Context; NUM_CHANNELS];
+type ContourFiltersList =
+    [dsp_tool_box_rs::filtering::one_pole_filter::OnePoleContext; NUM_CHANNELS];
 type AudioFrame = [RealType; NUM_CHANNELS_SSE];
 
+// #[repr(C)]
 pub struct Context {
     channel_steps_list: ChannelStepsList,
     contour_filters: ContourFiltersList,
-    delay_phase: mod_phase::Context,
-    fade_in_phase: mod_phase::Context,
-    step_phase: mod_phase::Context,
+    delay_phase: dsp_tool_box_rs::modulation::phase::PhaseContext,
+    fade_in_phase: dsp_tool_box_rs::modulation::phase::PhaseContext,
+    step_phase: dsp_tool_box_rs::modulation::phase::PhaseContext,
     delay_phase_val: RealType,
     step_phase_val: RealType,
     fade_in_phase_val: RealType,
@@ -69,12 +70,12 @@ impl Context {
         let mut new_self = Self {
             channel_steps_list: [[0.; MAX_NUM_STEPS]; NUM_CHANNELS],
             contour_filters: [
-                contour_filter::Context::new(0.9),
-                contour_filter::Context::new(0.9),
+                dsp_tool_box_rs::filtering::one_pole_filter::OnePoleContext::new(0.9),
+                dsp_tool_box_rs::filtering::one_pole_filter::OnePoleContext::new(0.9),
             ],
-            delay_phase: mod_phase::Context::new(),
-            fade_in_phase: mod_phase::Context::new(),
-            step_phase: mod_phase::Context::new(),
+            delay_phase: dsp_tool_box_rs::modulation::phase::PhaseContext::new(),
+            fade_in_phase: dsp_tool_box_rs::modulation::phase::PhaseContext::new(),
+            step_phase: dsp_tool_box_rs::modulation::phase::PhaseContext::new(),
             delay_phase_val: 0.,
             fade_in_phase_val: 0.,
             step_phase_val: 0.,
@@ -93,24 +94,30 @@ impl Context {
 
         new_self
             .delay_phase
-            .set_rate(mod_phase::note_length_to_rate(INIT_NOTE_LEN));
+            .set_rate(dsp_tool_box_rs::modulation::phase::note_length_to_rate(
+                INIT_NOTE_LEN,
+            ));
         new_self
             .delay_phase
-            .set_sync_mode(mod_phase::SyncMode::ProjectSync);
+            .set_sync_mode(dsp_tool_box_rs::modulation::phase::SyncMode::ProjectSync);
 
         new_self
             .fade_in_phase
-            .set_rate(mod_phase::note_length_to_rate(INIT_NOTE_LEN));
+            .set_rate(dsp_tool_box_rs::modulation::phase::note_length_to_rate(
+                INIT_NOTE_LEN,
+            ));
         new_self
             .fade_in_phase
-            .set_sync_mode(mod_phase::SyncMode::ProjectSync);
+            .set_sync_mode(dsp_tool_box_rs::modulation::phase::SyncMode::ProjectSync);
 
         new_self
             .step_phase
-            .set_rate(mod_phase::note_length_to_rate(INIT_NOTE_LEN));
+            .set_rate(dsp_tool_box_rs::modulation::phase::note_length_to_rate(
+                INIT_NOTE_LEN,
+            ));
         new_self
             .step_phase
-            .set_sync_mode(mod_phase::SyncMode::ProjectSync);
+            .set_sync_mode(dsp_tool_box_rs::modulation::phase::SyncMode::ProjectSync);
 
         const TEMPO_BPM: RealType = 120.;
         new_self.set_tempo(TEMPO_BPM);
@@ -209,7 +216,7 @@ impl Context {
 
         let contour = self.contour;
         self.contour_filters.iter_mut().for_each(|item| {
-            let pole = tau_to_pole(contour, value);
+            let pole = dsp_tool_box_rs::filtering::one_pole_filter::tau_to_pole(contour, value);
             item.update_pole(pole);
         });
     }
@@ -256,7 +263,8 @@ impl Context {
         let contour = self.contour;
         let sample_rate = self.sample_rate;
         self.contour_filters.iter_mut().for_each(|item| {
-            let pole = tau_to_pole(contour, sample_rate);
+            let pole =
+                dsp_tool_box_rs::filtering::one_pole_filter::tau_to_pole(contour, sample_rate);
             item.update_pole(pole);
         });
     }
