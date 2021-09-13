@@ -6,7 +6,7 @@ use crate::detail::shuffle_note::is_shuffle_note;
 use crate::RealType;
 
 /// A step is represented by a position, a step count and the shuffle option.
-// #[repr(C)]
+//#[repr(C)]
 pub struct Step {
     pos: usize,
     count: usize,
@@ -31,8 +31,10 @@ impl Step {
 }
 
 const NUM_CHANNELS_SSE: usize = 4;
+/* pub */
 const NUM_CHANNELS: usize = 2;
 const MIN_NUM_STEPS: usize = 1;
+/* pub */
 const MAX_NUM_STEPS: usize = 32;
 const L: usize = 0;
 const R: usize = 1;
@@ -44,7 +46,7 @@ type ContourFiltersList =
     [dsp_tool_box_rs::filtering::one_pole_filter::OnePoleContext; NUM_CHANNELS];
 type AudioFrame = [RealType; NUM_CHANNELS_SSE];
 
-// #[repr(C)]
+//#[repr(C)]
 pub struct Context {
     channel_steps_list: ChannelStepsList,
     contour_filters: ContourFiltersList,
