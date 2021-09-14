@@ -6,6 +6,7 @@ use crate::detail::shuffle_note::is_shuffle_note;
 use crate::RealType;
 
 /// A step is represented by a position, a step count and the shuffle option.
+#[derive(Debug, Copy, Clone)]
 //#[repr(C)]
 pub struct Step {
     pos: usize,
@@ -46,6 +47,7 @@ type ContourFiltersList =
     [dsp_tool_box_rs::filtering::one_pole_filter::OnePoleContext; NUM_CHANNELS];
 type AudioFrame = [RealType; NUM_CHANNELS_SSE];
 
+#[derive(Debug, Copy, Clone)]
 //#[repr(C)]
 pub struct Context {
     channel_steps_list: ChannelStepsList,
@@ -355,8 +357,11 @@ fn set_shuffle(step: &mut Step, note_len: RealType) {
 
 #[cfg(test)]
 mod tests {
+    use crate::trance_gate::Context;
+
     #[test]
-    fn name() {
-        println!("");
+    fn test_tg_context_debug_print() {
+        let c = Context::new();
+        println!("{:#?}", c);
     }
 }
