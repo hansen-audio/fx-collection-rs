@@ -43,8 +43,7 @@ const ONE_SAMPLE: usize = 1;
 
 type StepValues = [RealType; MAX_NUM_STEPS];
 type ChannelStepsList = [StepValues; NUM_CHANNELS];
-type ContourFiltersList =
-    [dsp_tool_box_rs::filtering::one_pole_filter::OnePoleContext; NUM_CHANNELS];
+type ContourFiltersList = [dsp_tool_box_rs::filtering::one_pole_filter::OnePole; NUM_CHANNELS];
 type AudioFrame = [RealType; NUM_CHANNELS_SSE];
 
 #[derive(Debug, Copy, Clone)]
@@ -52,9 +51,9 @@ type AudioFrame = [RealType; NUM_CHANNELS_SSE];
 pub struct Context {
     channel_steps_list: ChannelStepsList,
     contour_filters: ContourFiltersList,
-    delay_phase: dsp_tool_box_rs::modulation::phase::PhaseContext,
-    fade_in_phase: dsp_tool_box_rs::modulation::phase::PhaseContext,
-    step_phase: dsp_tool_box_rs::modulation::phase::PhaseContext,
+    delay_phase: dsp_tool_box_rs::modulation::phase::Phase,
+    fade_in_phase: dsp_tool_box_rs::modulation::phase::Phase,
+    step_phase: dsp_tool_box_rs::modulation::phase::Phase,
     delay_phase_val: RealType,
     step_phase_val: RealType,
     fade_in_phase_val: RealType,
@@ -74,12 +73,12 @@ impl Context {
         let mut new_self = Self {
             channel_steps_list: [[0.; MAX_NUM_STEPS]; NUM_CHANNELS],
             contour_filters: [
-                dsp_tool_box_rs::filtering::one_pole_filter::OnePoleContext::new(0.9),
-                dsp_tool_box_rs::filtering::one_pole_filter::OnePoleContext::new(0.9),
+                dsp_tool_box_rs::filtering::one_pole_filter::OnePole::new(0.9),
+                dsp_tool_box_rs::filtering::one_pole_filter::OnePole::new(0.9),
             ],
-            delay_phase: dsp_tool_box_rs::modulation::phase::PhaseContext::new(),
-            fade_in_phase: dsp_tool_box_rs::modulation::phase::PhaseContext::new(),
-            step_phase: dsp_tool_box_rs::modulation::phase::PhaseContext::new(),
+            delay_phase: dsp_tool_box_rs::modulation::phase::Phase::new(),
+            fade_in_phase: dsp_tool_box_rs::modulation::phase::Phase::new(),
+            step_phase: dsp_tool_box_rs::modulation::phase::Phase::new(),
             delay_phase_val: 0.,
             fade_in_phase_val: 0.,
             step_phase_val: 0.,
@@ -360,6 +359,7 @@ mod tests {
     use crate::trance_gate::Context;
 
     #[test]
+    #[ignore]
     fn test_tg_context_debug_print() {
         let c = Context::new();
         println!("{:#?}", c);
