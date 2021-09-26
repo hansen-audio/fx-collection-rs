@@ -48,7 +48,7 @@ type AudioFrame = [RealType; NUM_CHANNELS_SSE];
 
 #[derive(Debug, Copy, Clone)]
 //#[repr(C)]
-pub struct Context {
+pub struct TranceGate {
     channel_steps_list: ChannelStepsList,
     contour_filters: ContourFiltersList,
     delay_phase: dsp_tool_box_rs::modulation::phase::Phase,
@@ -68,7 +68,7 @@ pub struct Context {
     is_fade_in_active: bool,
 }
 
-impl Context {
+impl TranceGate {
     pub fn new() -> Self {
         let mut new_self = Self {
             channel_steps_list: [[0.; MAX_NUM_STEPS]; NUM_CHANNELS],
@@ -338,7 +338,7 @@ fn apply_shuffle(
     value_le: &mut RealType,
     value_ri: &mut RealType,
     phase_value: RealType,
-    context: &Context,
+    context: &TranceGate,
 ) {
     // TODO: Is this a good value for a MAX_DELAY?
     const MAX_DELAY: RealType = 3. / 4.;
@@ -356,12 +356,12 @@ fn set_shuffle(step: &mut Step, note_len: RealType) {
 
 #[cfg(test)]
 mod tests {
-    use crate::trance_gate::Context;
+    use crate::trance_gate::TranceGate;
 
     #[test]
     #[ignore]
     fn test_tg_context_debug_print() {
-        let c = Context::new();
+        let c = TranceGate::new();
         println!("{:#?}", c);
     }
 }

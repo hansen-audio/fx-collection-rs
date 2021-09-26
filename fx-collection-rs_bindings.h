@@ -10,7 +10,7 @@ namespace ha {
 namespace fx_collection_rs {
 namespace trance_gate {
 
-struct Context;
+struct TranceGate;
 
 using RealType = float;
 
@@ -18,45 +18,45 @@ using AudioFrame = RealType[4];
 
 extern "C" {
 
-Context *tg_create();
+TranceGate *tg_create();
 
-void tg_destroy(Context *tg_context);
+void tg_destroy(TranceGate *tg_context);
 
-void set_tempo(Context *context, RealType tempo_bpm);
+void set_tempo(TranceGate *context, RealType tempo_bpm);
 
-void trigger(Context *context, RealType delay_len, RealType fade_in_len);
+void trigger(TranceGate *context, RealType delay_len, RealType fade_in_len);
 
-void reset(Context *context);
+void reset(TranceGate *context);
 
-void reset_step_pos(Context *context, uintptr_t value);
+void reset_step_pos(TranceGate *context, uintptr_t value);
 
-uintptr_t get_step_pos(Context *context);
+uintptr_t get_step_pos(TranceGate *context);
 
-void process(Context *context, const AudioFrame *inputs, AudioFrame *outputs);
+void process(TranceGate *context, const AudioFrame *inputs, AudioFrame *outputs);
 
-void set_sample_rate(Context *context, RealType value);
+void set_sample_rate(TranceGate *context, RealType value);
 
-void set_step(Context *context, uintptr_t channel, uintptr_t step, RealType value_normalized);
+void set_step(TranceGate *context, uintptr_t channel, uintptr_t step, RealType value_normalized);
 
-void set_width(Context *context, RealType value);
+void set_width(TranceGate *context, RealType value);
 
-void set_shuffle_amount(Context *context, RealType value);
+void set_shuffle_amount(TranceGate *context, RealType value);
 
-void set_stereo_mode(Context *context, bool value);
+void set_stereo_mode(TranceGate *context, bool value);
 
-void set_step_len(Context *context, RealType value);
+void set_step_len(TranceGate *context, RealType value);
 
-void update_project_time_music(Context *context, RealType value);
+void update_project_time_music(TranceGate *context, RealType value);
 
-void set_step_count(Context *context, uintptr_t value);
+void set_step_count(TranceGate *context, uintptr_t value);
 
-void set_contour(Context *context, RealType value_secs);
+void set_contour(TranceGate *context, RealType value_secs);
 
-void set_fade_in(Context *context, RealType value);
+void set_fade_in(TranceGate *context, RealType value);
 
-void set_delay(Context *context, RealType value);
+void set_delay(TranceGate *context, RealType value);
 
-void set_mix(Context *context, RealType value);
+void set_mix(TranceGate *context, RealType value);
 
 } // extern "C"
 
