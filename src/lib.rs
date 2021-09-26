@@ -5,4 +5,4 @@ pub type AudioFrame = [RealType; 4];
 
 pub mod cbindings;
 mod detail;
-mod trance_gate;
+pub mod trance_gate;
