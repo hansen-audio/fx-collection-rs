@@ -1,7 +1,7 @@
 // Copyright(c) 2021 Hansen Audio.
 
-pub type RealType = f32;
-pub type AudioFrame = [RealType; 4];
+pub type Real = f32;
+pub type AudioFrame = [Real; 4];
 
 pub mod cbindings;
 mod detail;
