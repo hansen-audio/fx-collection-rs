@@ -2,8 +2,8 @@
 
 use dsp_tool_box_rs as dtb;
 
-use super::detail::shuffle_note::*;
-use crate::Real;
+use super::detail::shuffle_note::is_shuffle_note;
+use crate::{Real, NUM_CHANNELS};
 
 /// A step is represented by a position, a step count and the shuffle option.
 #[derive(Debug, Copy, Clone)]
@@ -30,8 +30,6 @@ impl Step {
     }
 }
 
-const NUM_CHANNELS_SSE: usize = 4;
-const NUM_CHANNELS: usize = 2;
 const MIN_NUM_STEPS: usize = 1;
 const MAX_NUM_STEPS: usize = 32;
 const ONE_SAMPLE: usize = 1;
@@ -41,7 +39,7 @@ const R: usize = 1;
 type StepValues = [Real; MAX_NUM_STEPS];
 type ChannelStepsList = [StepValues; NUM_CHANNELS];
 type ContourFiltersList = [dtb::filtering::one_pole_filter::OnePole; NUM_CHANNELS];
-type AudioFrame = [Real; NUM_CHANNELS_SSE];
+type AudioFrame = [Real; NUM_CHANNELS];
 
 #[derive(Debug, Copy, Clone)]
 //#[repr(C)]
