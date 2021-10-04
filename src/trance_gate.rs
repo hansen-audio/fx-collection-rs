@@ -41,7 +41,7 @@ type ChannelStepsList = [StepValues; NUM_CHANNELS];
 type ContourFiltersList = [dtb::filtering::one_pole_filter::OnePole; NUM_CHANNELS];
 type AudioFrame = [Real; NUM_CHANNELS];
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 //#[repr(C)]
 pub struct TranceGate {
     channel_steps_list: ChannelStepsList,
