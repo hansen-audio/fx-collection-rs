@@ -147,7 +147,7 @@ impl TranceGate {
         self.step_val.pos = value;
     }
 
-    pub fn get_step_pos(&mut self) -> usize {
+    pub fn step_pos(&self) -> usize {
         self.step_val.pos
     }
 
@@ -191,7 +191,7 @@ impl TranceGate {
             return;
         }
         self.step_val.advance();
-        set_shuffle(&mut self.step_val, self.step_phase.get_note_len());
+        set_shuffle(&mut self.step_val, self.step_phase.note_len());
     }
 
     pub fn set_sample_rate(&mut self, value: Real) {
