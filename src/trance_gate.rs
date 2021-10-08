@@ -5,8 +5,7 @@ use dsp_tool_box_rs as dtb;
 use super::detail::shuffle_note::is_shuffle_note;
 use crate::{Real, NUM_CHANNELS};
 
-/// A step is represented by a position, a step count and the shuffle option.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 struct Step {
     pos: usize,
     count: usize,
@@ -36,13 +35,12 @@ const ONE_SAMPLE: usize = 1;
 const L: usize = 0;
 const R: usize = 1;
 
-type StepValues = [Real; MAX_NUM_STEPS];
-type ChannelStepsList = [StepValues; NUM_CHANNELS];
+type StepVals = [Real; MAX_NUM_STEPS];
+type ChannelStepsList = [StepVals; NUM_CHANNELS];
 type ContourFiltersList = [dtb::filtering::one_pole_filter::OnePole; NUM_CHANNELS];
 type AudioFrame = [Real; NUM_CHANNELS];
 
 #[derive(Debug, Clone)]
-//#[repr(C)]
 pub struct TranceGate {
     channel_steps_list: ChannelStepsList,
     contour_filters: ContourFiltersList,
@@ -66,7 +64,7 @@ pub struct TranceGate {
 impl TranceGate {
     pub fn new() -> Self {
         use dtb::filtering::one_pole_filter::OnePole;
-        use dtb::modulation::phase::note_length_to_rate;
+        use dtb::modulation::phase::note_len_to_rate;
         use dtb::modulation::phase::SyncMode;
 
         let mut new_self = Self {
@@ -93,17 +91,17 @@ impl TranceGate {
 
         new_self
             .delay_phase
-            .set_rate(note_length_to_rate(INIT_NOTE_LEN));
+            .set_rate(note_len_to_rate(INIT_NOTE_LEN));
         new_self.delay_phase.set_sync_mode(SyncMode::ProjectSync);
 
         new_self
             .fade_in_phase
-            .set_rate(note_length_to_rate(INIT_NOTE_LEN));
+            .set_rate(note_len_to_rate(INIT_NOTE_LEN));
         new_self.fade_in_phase.set_sync_mode(SyncMode::ProjectSync);
 
         new_self
             .step_phase
-            .set_rate(note_length_to_rate(INIT_NOTE_LEN));
+            .set_rate(note_len_to_rate(INIT_NOTE_LEN));
         new_self.step_phase.set_sync_mode(SyncMode::ProjectSync);
 
         const TEMPO_BPM: Real = 120.;
@@ -332,8 +330,7 @@ fn apply_shuffle(
 }
 
 fn set_shuffle(step: &mut Step, note_len: Real) {
-    let pos = step.pos;
-    step.is_shuffle = is_shuffle_note(pos, note_len);
+    step.is_shuffle = is_shuffle_note(step.pos, note_len);
 }
 
 #[cfg(test)]
