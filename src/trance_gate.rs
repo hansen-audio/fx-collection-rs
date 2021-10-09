@@ -64,7 +64,7 @@ pub struct TranceGate {
 impl TranceGate {
     pub fn new() -> Self {
         use dtb::filtering::one_pole_filter::OnePole;
-        use dtb::modulation::phase::note_len_to_rate;
+        use dtb::modulation::phase::Phase;
         use dtb::modulation::phase::SyncMode;
 
         let mut new_self = Self {
@@ -91,17 +91,17 @@ impl TranceGate {
 
         new_self
             .delay_phase
-            .set_rate(note_len_to_rate(INIT_NOTE_LEN));
+            .set_rate(Phase::note_len_to_rate(INIT_NOTE_LEN));
         new_self.delay_phase.set_sync_mode(SyncMode::ProjectSync);
 
         new_self
             .fade_in_phase
-            .set_rate(note_len_to_rate(INIT_NOTE_LEN));
+            .set_rate(Phase::note_len_to_rate(INIT_NOTE_LEN));
         new_self.fade_in_phase.set_sync_mode(SyncMode::ProjectSync);
 
         new_self
             .step_phase
-            .set_rate(note_len_to_rate(INIT_NOTE_LEN));
+            .set_rate(Phase::note_len_to_rate(INIT_NOTE_LEN));
         new_self.step_phase.set_sync_mode(SyncMode::ProjectSync);
 
         const TEMPO_BPM: Real = 120.;
