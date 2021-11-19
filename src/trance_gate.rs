@@ -154,7 +154,7 @@ impl TranceGate {
             .delay_phase
             .advance_one_shot(&mut self.delay_phase_val, ONE_SAMPLE);
 
-        if !is_overflow {
+        if !is_overflow && self.is_delay_active {
             outputs.copy_from_slice(inputs);
             return;
         }
