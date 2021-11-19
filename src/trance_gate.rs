@@ -3,7 +3,7 @@
 use dsp_tool_box_rs as dtb;
 
 use super::detail::shuffle_note::is_shuffle_note;
-use crate::{Real, NUM_CHANNELS};
+use crate::NUM_CHANNELS;
 
 #[derive(Debug, Clone)]
 struct Step {
@@ -35,10 +35,10 @@ const ONE_SAMPLE: usize = 1;
 const L: usize = 0;
 const R: usize = 1;
 
-type StepVals = [Real; MAX_NUM_STEPS];
+type StepVals = [f32; MAX_NUM_STEPS];
 type ChannelStepsList = [StepVals; NUM_CHANNELS];
 type ContourFiltersList = [dtb::filtering::one_pole_filter::OnePole; NUM_CHANNELS];
-type AudioFrame = [Real; NUM_CHANNELS];
+type AudioFrame = [f32; NUM_CHANNELS];
 
 #[derive(Debug, Clone)]
 pub struct TranceGate {
@@ -47,15 +47,15 @@ pub struct TranceGate {
     delay_phase: dtb::modulation::phase::Phase,
     fade_in_phase: dtb::modulation::phase::Phase,
     step_phase: dtb::modulation::phase::Phase,
-    delay_phase_val: Real,
-    step_phase_val: Real,
-    fade_in_phase_val: Real,
+    delay_phase_val: f32,
+    step_phase_val: f32,
+    fade_in_phase_val: f32,
     step_val: Step,
-    mix: Real,
-    width: Real,
-    shuffle: Real,
-    contour: Real,
-    sample_rate: Real,
+    mix: f32,
+    width: f32,
+    shuffle: f32,
+    contour: f32,
+    sample_rate: f32,
     ch: usize,
     is_delay_active: bool,
     is_fade_in_active: bool,
@@ -87,7 +87,7 @@ impl TranceGate {
             is_fade_in_active: false,
         };
 
-        const INIT_NOTE_LEN: Real = 1. / 32.;
+        const INIT_NOTE_LEN: f32 = 1. / 32.;
 
         new_self
             .delay_phase
@@ -104,19 +104,19 @@ impl TranceGate {
             .set_rate(Phase::note_len_to_rate(INIT_NOTE_LEN));
         new_self.step_phase.set_sync_mode(SyncMode::ProjectSync);
 
-        const TEMPO_BPM: Real = 120.;
+        const TEMPO_BPM: f32 = 120.;
         new_self.set_tempo(TEMPO_BPM);
 
         new_self
     }
 
-    pub fn set_tempo(&mut self, tempo_bpm: Real) {
+    pub fn set_tempo(&mut self, tempo_bpm: f32) {
         self.delay_phase.set_tempo(tempo_bpm);
         self.fade_in_phase.set_tempo(tempo_bpm);
         self.step_phase.set_tempo(tempo_bpm);
     }
 
-    pub fn trigger(&mut self, delay_len: Real, fade_in_len: Real) {
+    pub fn trigger(&mut self, delay_len: f32, fade_in_len: f32) {
         self.set_delay(delay_len);
         self.set_fade_in(fade_in_len);
 
@@ -192,7 +192,7 @@ impl TranceGate {
         set_shuffle(&mut self.step_val, self.step_phase.note_len());
     }
 
-    pub fn set_sample_rate(&mut self, value: Real) {
+    pub fn set_sample_rate(&mut self, value: f32) {
         use dtb::filtering::one_pole_filter::OnePole;
 
         self.delay_phase.set_sample_rate(value);
@@ -208,15 +208,15 @@ impl TranceGate {
         });
     }
 
-    pub fn set_step(&mut self, channel: usize, step: usize, value_normalized: Real) {
+    pub fn set_step(&mut self, channel: usize, step: usize, value_normalized: f32) {
         self.channel_steps_list[channel][step] = value_normalized;
     }
 
-    pub fn set_width(&mut self, value: Real) {
+    pub fn set_width(&mut self, value: f32) {
         self.width = 1. - value;
     }
 
-    pub fn set_shuffle_amount(&mut self, value: Real) {
+    pub fn set_shuffle_amount(&mut self, value: f32) {
         self.shuffle = value;
     }
 
@@ -227,11 +227,11 @@ impl TranceGate {
         }
     }
 
-    pub fn set_step_len(&mut self, value: Real) {
+    pub fn set_step_len(&mut self, value: f32) {
         self.step_phase.set_note_len(value);
     }
 
-    pub fn update_project_time_music(&mut self, value: Real) {
+    pub fn update_project_time_music(&mut self, value: f64) {
         self.delay_phase.set_project_time(value);
         self.fade_in_phase.set_project_time(value);
         self.step_phase.set_project_time(value);
@@ -241,7 +241,7 @@ impl TranceGate {
         self.step_val.count = value.clamp(MIN_NUM_STEPS, MAX_NUM_STEPS);
     }
 
-    pub fn set_contour(&mut self, value_secs: Real) {
+    pub fn set_contour(&mut self, value_secs: f32) {
         use dtb::filtering::one_pole_filter::OnePole;
 
         if self.contour == value_secs {
@@ -257,7 +257,7 @@ impl TranceGate {
         });
     }
 
-    pub fn set_fade_in(&mut self, value: Real) {
+    pub fn set_fade_in(&mut self, value: f32) {
         self.is_fade_in_active = value > 0.;
         if !self.is_fade_in_active {
             return;
@@ -266,7 +266,7 @@ impl TranceGate {
         self.fade_in_phase.set_note_len(value);
     }
 
-    pub fn set_delay(&mut self, value: Real) {
+    pub fn set_delay(&mut self, value: f32) {
         self.is_delay_active = value > 0.;
         if !self.is_delay_active {
             return;
@@ -275,36 +275,32 @@ impl TranceGate {
         self.delay_phase.set_note_len(value);
     }
 
-    pub fn set_mix(&mut self, value: Real) {
+    pub fn set_mix(&mut self, value: f32) {
         self.mix = value;
     }
 }
 
-fn apply_width(value_le: &mut Real, value_ri: &mut Real, width: Real) {
+fn apply_width(value_le: &mut f32, value_ri: &mut f32, width: f32) {
     *value_le = value_le.max(*value_le * width);
     *value_ri = value_ri.max(*value_ri * width);
 }
 
-fn apply_mix(value: &mut Real, mix: Real) {
-    const MIX_MAX: Real = 1.;
+fn apply_mix(value: &mut f32, mix: f32) {
+    const MIX_MAX: f32 = 1.;
     *value = (MIX_MAX - mix) + *value * mix;
 }
 
-fn apply_mix_stereo(value_le: &mut Real, value_ri: &mut Real, mix: Real) {
+fn apply_mix_stereo(value_le: &mut f32, value_ri: &mut f32, mix: f32) {
     apply_mix(value_le, mix);
     apply_mix(value_ri, mix);
 }
 
-fn apply_contour(
-    value_le: &mut Real,
-    value_ri: &mut Real,
-    contour_filters: &mut ContourFiltersList,
-) {
+fn apply_contour(value_le: &mut f32, value_ri: &mut f32, contour_filters: &mut ContourFiltersList) {
     *value_le = contour_filters[L].process(*value_le);
     *value_ri = contour_filters[R].process(*value_ri);
 }
 
-fn apply_gate_delay(value_le: &mut Real, value_ri: &mut Real, phase_value: Real, delay: Real) {
+fn apply_gate_delay(value_le: &mut f32, value_ri: &mut f32, phase_value: f32, delay: f32) {
     let factor = match phase_value > delay {
         true => 1.,
         false => 0.,
@@ -314,14 +310,9 @@ fn apply_gate_delay(value_le: &mut Real, value_ri: &mut Real, phase_value: Real,
     *value_ri = *value_ri * factor;
 }
 
-fn apply_shuffle(
-    value_le: &mut Real,
-    value_ri: &mut Real,
-    phase_value: Real,
-    context: &TranceGate,
-) {
+fn apply_shuffle(value_le: &mut f32, value_ri: &mut f32, phase_value: f32, context: &TranceGate) {
     // TODO: Is this a good value for a MAX_DELAY?
-    const MAX_DELAY: Real = 3. / 4.;
+    const MAX_DELAY: f32 = 3. / 4.;
     let delay = context.shuffle * MAX_DELAY;
 
     if context.step_val.is_shuffle {
@@ -329,7 +320,7 @@ fn apply_shuffle(
     }
 }
 
-fn set_shuffle(step: &mut Step, note_len: Real) {
+fn set_shuffle(step: &mut Step, note_len: f32) {
     step.is_shuffle = is_shuffle_note(step.pos, note_len);
 }
 

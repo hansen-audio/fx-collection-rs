@@ -1,6 +1,6 @@
 // Copyright(c) 2021 Hansen Audio.
 
-use crate::{trance_gate, AudioFrame, Real};
+use crate::{trance_gate, AudioFrame};
 
 //-----------------------------------------------------------------------------
 // https://firefox-source-docs.mozilla.org/writing-rust-code/ffi.html
@@ -18,15 +18,15 @@ pub unsafe extern "C" fn tg_destroy(context: *mut trance_gate::TranceGate) {
 //-----------------------------------------------------------------------------
 
 #[no_mangle]
-pub unsafe extern "C" fn set_tempo(context: &mut trance_gate::TranceGate, tempo_bpm: Real) {
+pub unsafe extern "C" fn set_tempo(context: &mut trance_gate::TranceGate, tempo_bpm: f32) {
     context.set_tempo(tempo_bpm);
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn trigger(
     context: &mut trance_gate::TranceGate,
-    delay_len: Real,
-    fade_in_len: Real,
+    delay_len: f32,
+    fade_in_len: f32,
 ) {
     context.trigger(delay_len, fade_in_len);
 }
@@ -56,7 +56,7 @@ pub unsafe extern "C" fn process(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn set_sample_rate(context: &mut trance_gate::TranceGate, value: Real) {
+pub unsafe extern "C" fn set_sample_rate(context: &mut trance_gate::TranceGate, value: f32) {
     context.set_sample_rate(value);
 }
 
@@ -65,18 +65,18 @@ pub unsafe extern "C" fn set_step(
     context: &mut trance_gate::TranceGate,
     channel: usize,
     step: usize,
-    value_normalized: Real,
+    value_normalized: f32,
 ) {
     context.set_step(channel, step, value_normalized);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn set_width(context: &mut trance_gate::TranceGate, value: Real) {
+pub unsafe extern "C" fn set_width(context: &mut trance_gate::TranceGate, value: f32) {
     context.set_width(value);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn set_shuffle_amount(context: &mut trance_gate::TranceGate, value: Real) {
+pub unsafe extern "C" fn set_shuffle_amount(context: &mut trance_gate::TranceGate, value: f32) {
     context.set_shuffle_amount(value);
 }
 
@@ -86,14 +86,14 @@ pub unsafe extern "C" fn set_stereo_mode(context: &mut trance_gate::TranceGate, 
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn set_step_len(context: &mut trance_gate::TranceGate, value: Real) {
+pub unsafe extern "C" fn set_step_len(context: &mut trance_gate::TranceGate, value: f32) {
     context.set_step_len(value);
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn update_project_time_music(
     context: &mut trance_gate::TranceGate,
-    value: Real,
+    value: f64,
 ) {
     context.update_project_time_music(value);
 }
@@ -104,21 +104,21 @@ pub unsafe extern "C" fn set_step_count(context: &mut trance_gate::TranceGate, v
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn set_contour(context: &mut trance_gate::TranceGate, value_secs: Real) {
+pub unsafe extern "C" fn set_contour(context: &mut trance_gate::TranceGate, value_secs: f32) {
     context.set_contour(value_secs);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn set_fade_in(context: &mut trance_gate::TranceGate, value: Real) {
+pub unsafe extern "C" fn set_fade_in(context: &mut trance_gate::TranceGate, value: f32) {
     context.set_fade_in(value);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn set_delay(context: &mut trance_gate::TranceGate, value: Real) {
+pub unsafe extern "C" fn set_delay(context: &mut trance_gate::TranceGate, value: f32) {
     context.set_delay(value);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn set_mix(context: &mut trance_gate::TranceGate, value: Real) {
+pub unsafe extern "C" fn set_mix(context: &mut trance_gate::TranceGate, value: f32) {
     context.set_mix(value);
 }
