@@ -159,17 +159,11 @@ impl TranceGate {
             return;
         }
 
-        let mut value_le = self.channel_steps_list[L][self.step_val.pos];
-        let mut value_ri = self.channel_steps_list[self.ch][self.step_val.pos];
+        let pos = self.step_val.pos;
+        let mut value_le = self.channel_steps_list[L][pos];
+        let mut value_ri = self.channel_steps_list[self.ch][pos];
 
-        apply_shuffle(&mut value_le, &mut value_ri, self.step_phase_val, self);
-        apply_width(&mut value_le, &mut value_ri, self.width);
-        apply_contour(&mut value_le, &mut value_ri, &mut self.contour_filters);
-        let tmp_mix = match self.is_fade_in_active {
-            true => self.mix * self.fade_in_phase_val,
-            false => self.mix,
-        };
-        apply_mix_stereo(&mut value_le, &mut value_ri, tmp_mix);
+        self.apply_effect(&mut value_le, &mut value_ri);
 
         outputs[L] = inputs[L] * value_le;
         outputs[R] = inputs[R] * value_ri;
@@ -189,7 +183,7 @@ impl TranceGate {
             return;
         }
         self.step_val.advance();
-        set_shuffle(&mut self.step_val, self.step_phase.note_len());
+        TranceGate::set_shuffle(&mut self.step_val, self.step_phase.note_len());
     }
 
     pub fn set_sample_rate(&mut self, value: f32) {
@@ -278,50 +272,66 @@ impl TranceGate {
     pub fn set_mix(&mut self, value: f32) {
         self.mix = value;
     }
-}
 
-fn apply_width(value_le: &mut f32, value_ri: &mut f32, width: f32) {
-    *value_le = value_le.max(*value_le * width);
-    *value_ri = value_ri.max(*value_ri * width);
-}
-
-fn apply_mix(value: &mut f32, mix: f32) {
-    const MIX_MAX: f32 = 1.;
-    *value = (MIX_MAX - mix) + *value * mix;
-}
-
-fn apply_mix_stereo(value_le: &mut f32, value_ri: &mut f32, mix: f32) {
-    apply_mix(value_le, mix);
-    apply_mix(value_ri, mix);
-}
-
-fn apply_contour(value_le: &mut f32, value_ri: &mut f32, contour_filters: &mut ContourFiltersList) {
-    *value_le = contour_filters[L].process(*value_le);
-    *value_ri = contour_filters[R].process(*value_ri);
-}
-
-fn apply_gate_delay(value_le: &mut f32, value_ri: &mut f32, phase_value: f32, delay: f32) {
-    let factor = match phase_value > delay {
-        true => 1.,
-        false => 0.,
-    };
-
-    *value_le = *value_le * factor;
-    *value_ri = *value_ri * factor;
-}
-
-fn apply_shuffle(value_le: &mut f32, value_ri: &mut f32, phase_value: f32, context: &TranceGate) {
-    // TODO: Is this a good value for a MAX_DELAY?
-    const MAX_DELAY: f32 = 3. / 4.;
-    let delay = context.shuffle * MAX_DELAY;
-
-    if context.step_val.is_shuffle {
-        apply_gate_delay(value_le, value_ri, phase_value, delay);
+    // private
+    fn apply_effect(&mut self, value_le: &mut f32, value_ri: &mut f32) {
+        self.apply_shuffle(value_le, value_ri);
+        self.apply_width(value_le, value_ri);
+        self.apply_contour(value_le, value_ri);
+        self.apply_mix_stereo(value_le, value_ri);
     }
-}
 
-fn set_shuffle(step: &mut Step, note_len: f32) {
-    step.is_shuffle = is_shuffle_note(step.pos, note_len);
+    fn apply_shuffle(&mut self, value_le: &mut f32, value_ri: &mut f32) {
+        // TODO: Is this a good value for a MAX_DELAY?
+        const MAX_DELAY: f32 = 3. / 4.;
+        let delay = self.shuffle * MAX_DELAY;
+
+        if self.step_val.is_shuffle {
+            TranceGate::apply_gate_delay(value_le, value_ri, self.step_phase_val, delay);
+        }
+    }
+
+    fn apply_width(&self, value_le: &mut f32, value_ri: &mut f32) {
+        *value_le = value_le.max(*value_le * self.width);
+        *value_ri = value_ri.max(*value_ri * self.width);
+    }
+
+    fn apply_contour(&mut self, value_le: &mut f32, value_ri: &mut f32) {
+        *value_le = self.contour_filters[L].process(*value_le);
+        *value_ri = self.contour_filters[R].process(*value_ri);
+    }
+
+    fn compute_mix(&self) -> f32 {
+        match self.is_fade_in_active {
+            true => self.mix * self.fade_in_phase_val,
+            false => self.mix,
+        }
+    }
+
+    fn apply_mix(value: &mut f32, mix: f32) {
+        const MIX_MAX: f32 = 1.;
+        *value = (MIX_MAX - mix) + *value * mix;
+    }
+
+    fn apply_mix_stereo(&self, value_le: &mut f32, value_ri: &mut f32) {
+        let mix = self.compute_mix();
+        TranceGate::apply_mix(value_le, mix);
+        TranceGate::apply_mix(value_ri, mix);
+    }
+
+    fn apply_gate_delay(value_le: &mut f32, value_ri: &mut f32, phase_value: f32, delay: f32) {
+        let factor = match phase_value > delay {
+            true => 1.,
+            false => 0.,
+        };
+
+        *value_le = *value_le * factor;
+        *value_ri = *value_ri * factor;
+    }
+
+    fn set_shuffle(step: &mut Step, note_len: f32) {
+        step.is_shuffle = is_shuffle_note(step.pos, note_len);
+    }
 }
 
 #[cfg(test)]
