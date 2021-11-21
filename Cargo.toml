@@ -16,4 +16,4 @@ crate-type = ["staticlib"]
 lto = true
 
 [dependencies]
-dsp-tool-box-rs = { git = "http://gitea.fritz.box/hansen-audio/dsp-tool-box-rs.git", branch = "main"}
+dsp-tool-box-rs = { git = "https://www.github.com/hansen-audio/dsp-tool-box-rs.git", branch = "main"}
