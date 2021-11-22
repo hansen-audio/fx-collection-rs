@@ -69,7 +69,12 @@ impl TranceGate {
 
         let mut new_self = Self {
             channel_steps_list: [[0.; MAX_NUM_STEPS]; NUM_CHANNELS],
-            contour_filters: [OnePole::new(0.9), OnePole::new(0.9)],
+            contour_filters: [
+                OnePole::new(0.9),
+                OnePole::new(0.9),
+                OnePole::new(0.9),
+                OnePole::new(0.9),
+            ],
             delay_phase: dtb::modulation::phase::Phase::new(),
             fade_in_phase: dtb::modulation::phase::Phase::new(),
             step_phase: dtb::modulation::phase::Phase::new(),
