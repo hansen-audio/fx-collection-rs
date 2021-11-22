@@ -188,7 +188,7 @@ impl TranceGate {
             return;
         }
         self.step_val.advance();
-        TranceGate::set_shuffle(&mut self.step_val, self.step_phase.note_len());
+        Self::set_shuffle(&mut self.step_val, self.step_phase.note_len());
     }
 
     pub fn set_sample_rate(&mut self, value: f32) {
@@ -292,7 +292,7 @@ impl TranceGate {
         let delay = self.shuffle * MAX_DELAY;
 
         if self.step_val.is_shuffle {
-            TranceGate::apply_gate_delay(value_le, value_ri, self.step_phase_val, delay);
+            Self::apply_gate_delay(value_le, value_ri, self.step_phase_val, delay);
         }
     }
 
@@ -320,8 +320,8 @@ impl TranceGate {
 
     fn apply_mix_stereo(&self, value_le: &mut f32, value_ri: &mut f32) {
         let mix = self.compute_mix();
-        TranceGate::apply_mix(value_le, mix);
-        TranceGate::apply_mix(value_ri, mix);
+        Self::apply_mix(value_le, mix);
+        Self::apply_mix(value_ri, mix);
     }
 
     fn apply_gate_delay(value_le: &mut f32, value_ri: &mut f32, phase_value: f32, delay: f32) {
