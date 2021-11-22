@@ -2,7 +2,7 @@
 name = "fx-collection-rs"
 version = "0.1.0"
 authors = ["René Hansen <rene@hansen-audio.de>"]
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -16,4 +16,4 @@ crate-type = ["staticlib"]
 lto = true
 
 [dependencies]
-dsp-tool-box-rs = { git = "https://github.com/hansen-audio/dsp-tool-box-rs.git", branch = "main"}
+dsp-tool-box-rs = { git = "https://github.com/hansen-audio/dsp-tool-box-rs.git", branch = "main" }
