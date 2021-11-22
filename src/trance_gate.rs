@@ -1,6 +1,7 @@
 // Copyright(c) 2021 Hansen Audio.
 
-use dsp_tool_box_rs as dtb;
+use dsp_tool_box_rs::filtering;
+use dsp_tool_box_rs::modulation;
 
 use super::detail::shuffle_note::is_shuffle_note;
 use crate::NUM_CHANNELS;
@@ -37,16 +38,16 @@ const R: usize = 1;
 
 type StepVals = [f32; MAX_NUM_STEPS];
 type ChannelStepsList = [StepVals; NUM_CHANNELS];
-type ContourFiltersList = [dtb::filtering::one_pole_filter::OnePole; NUM_CHANNELS];
+type ContourFiltersList = [filtering::one_pole_filter::OnePole; NUM_CHANNELS];
 type AudioFrame = [f32; NUM_CHANNELS];
 
 #[derive(Debug, Clone)]
 pub struct TranceGate {
     channel_steps_list: ChannelStepsList,
     contour_filters: ContourFiltersList,
-    delay_phase: dtb::modulation::phase::Phase,
-    fade_in_phase: dtb::modulation::phase::Phase,
-    step_phase: dtb::modulation::phase::Phase,
+    delay_phase: modulation::phase::Phase,
+    fade_in_phase: modulation::phase::Phase,
+    step_phase: modulation::phase::Phase,
     delay_phase_val: f32,
     step_phase_val: f32,
     fade_in_phase_val: f32,
@@ -63,11 +64,11 @@ pub struct TranceGate {
 
 impl TranceGate {
     pub fn new() -> Self {
-        use dtb::filtering::one_pole_filter::OnePole;
-        use dtb::modulation::phase::Phase;
-        use dtb::modulation::phase::SyncMode;
+        use filtering::one_pole_filter::OnePole;
+        use modulation::phase::Phase;
+        use modulation::phase::SyncMode;
 
-        let mut new_self = Self {
+        let mut trance_gate = Self {
             channel_steps_list: [[0.; MAX_NUM_STEPS]; NUM_CHANNELS],
             contour_filters: [
                 OnePole::new(0.9),
@@ -75,9 +76,9 @@ impl TranceGate {
                 OnePole::new(0.9),
                 OnePole::new(0.9),
             ],
-            delay_phase: dtb::modulation::phase::Phase::new(),
-            fade_in_phase: dtb::modulation::phase::Phase::new(),
-            step_phase: dtb::modulation::phase::Phase::new(),
+            delay_phase: modulation::phase::Phase::new(),
+            fade_in_phase: modulation::phase::Phase::new(),
+            step_phase: modulation::phase::Phase::new(),
             delay_phase_val: 0.,
             fade_in_phase_val: 0.,
             step_phase_val: 0.,
@@ -94,25 +95,27 @@ impl TranceGate {
 
         const INIT_NOTE_LEN: f32 = 1. / 32.;
 
-        new_self
+        trance_gate
             .delay_phase
             .set_rate(Phase::note_len_to_rate(INIT_NOTE_LEN));
-        new_self.delay_phase.set_sync_mode(SyncMode::ProjectSync);
+        trance_gate.delay_phase.set_sync_mode(SyncMode::ProjectSync);
 
-        new_self
+        trance_gate
             .fade_in_phase
             .set_rate(Phase::note_len_to_rate(INIT_NOTE_LEN));
-        new_self.fade_in_phase.set_sync_mode(SyncMode::ProjectSync);
+        trance_gate
+            .fade_in_phase
+            .set_sync_mode(SyncMode::ProjectSync);
 
-        new_self
+        trance_gate
             .step_phase
             .set_rate(Phase::note_len_to_rate(INIT_NOTE_LEN));
-        new_self.step_phase.set_sync_mode(SyncMode::ProjectSync);
+        trance_gate.step_phase.set_sync_mode(SyncMode::ProjectSync);
 
         const TEMPO_BPM: f32 = 120.;
-        new_self.set_tempo(TEMPO_BPM);
+        trance_gate.set_tempo(TEMPO_BPM);
 
-        new_self
+        trance_gate
     }
 
     pub fn set_tempo(&mut self, tempo_bpm: f32) {
@@ -155,11 +158,7 @@ impl TranceGate {
     }
 
     pub fn process(&mut self, inputs: &AudioFrame, outputs: &mut AudioFrame) {
-        let is_overflow = self
-            .delay_phase
-            .advance_one_shot(&mut self.delay_phase_val, ONE_SAMPLE);
-
-        if !is_overflow && self.is_delay_active {
+        if self.is_delay_running() {
             outputs.copy_from_slice(inputs);
             return;
         }
@@ -192,7 +191,7 @@ impl TranceGate {
     }
 
     pub fn set_sample_rate(&mut self, value: f32) {
-        use dtb::filtering::one_pole_filter::OnePole;
+        use filtering::one_pole_filter::OnePole;
 
         self.delay_phase.set_sample_rate(value);
         self.fade_in_phase.set_sample_rate(value);
@@ -241,7 +240,7 @@ impl TranceGate {
     }
 
     pub fn set_contour(&mut self, value_secs: f32) {
-        use dtb::filtering::one_pole_filter::OnePole;
+        use filtering::one_pole_filter::OnePole;
 
         if self.contour == value_secs {
             return;
@@ -279,6 +278,14 @@ impl TranceGate {
     }
 
     // private
+    fn is_delay_running(&mut self) -> bool {
+        let is_overflow = self
+            .delay_phase
+            .advance_one_shot(&mut self.delay_phase_val, ONE_SAMPLE);
+
+        !is_overflow && self.is_delay_active
+    }
+
     fn apply_effect(&mut self, value_le: &mut f32, value_ri: &mut f32) {
         self.apply_shuffle(value_le, value_ri);
         self.apply_width(value_le, value_ri);
@@ -345,8 +352,8 @@ mod tests {
 
     #[test]
     #[ignore]
-    fn test_tg_context_debug_print() {
-        let c = TranceGate::new();
-        println!("{:#?}", c);
+    fn test_trance_gate_debug_print() {
+        let trance_gate = TranceGate::new();
+        println!("{:#?}", trance_gate);
     }
 }
