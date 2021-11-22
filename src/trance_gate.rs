@@ -83,7 +83,7 @@ impl TranceGate {
             fade_in_phase_val: 0.,
             step_phase_val: 0.,
             step_val: Step::new(0, 32, false),
-            mix: 0.,
+            mix: 0.5,
             width: 0.,
             shuffle: 0.,
             contour: 0.01,
