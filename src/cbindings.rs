@@ -18,107 +18,107 @@ pub unsafe extern "C" fn tg_destroy(context: *mut trance_gate::TranceGate) {
 //-----------------------------------------------------------------------------
 
 #[no_mangle]
-pub unsafe extern "C" fn set_tempo(context: &mut trance_gate::TranceGate, tempo_bpm: f32) {
-    context.set_tempo(tempo_bpm);
+pub unsafe extern "C" fn set_tempo(trance_gate: &mut trance_gate::TranceGate, tempo_bpm: f32) {
+    trance_gate.set_tempo(tempo_bpm);
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn trigger(
-    context: &mut trance_gate::TranceGate,
+    trance_gate: &mut trance_gate::TranceGate,
     delay_len: f32,
     fade_in_len: f32,
 ) {
-    context.trigger(delay_len, fade_in_len);
+    trance_gate.trigger(delay_len, fade_in_len);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn reset(context: &mut trance_gate::TranceGate) {
-    context.reset();
+pub unsafe extern "C" fn reset(trance_gate: &mut trance_gate::TranceGate) {
+    trance_gate.reset();
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn reset_step_pos(context: &mut trance_gate::TranceGate, value: usize) {
-    context.reset_step_pos(value);
+pub unsafe extern "C" fn reset_step_pos(trance_gate: &mut trance_gate::TranceGate, value: usize) {
+    trance_gate.reset_step_pos(value);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn get_step_pos(context: &mut trance_gate::TranceGate) -> usize {
-    context.step_pos()
+pub unsafe extern "C" fn get_step_pos(trance_gate: &mut trance_gate::TranceGate) -> usize {
+    trance_gate.step_pos()
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn process(
-    context: &mut trance_gate::TranceGate,
+    trance_gate: &mut trance_gate::TranceGate,
     inputs: &AudioFrame,
     outputs: &mut AudioFrame,
 ) {
-    context.process(inputs, outputs);
+    trance_gate.process(inputs, outputs);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn set_sample_rate(context: &mut trance_gate::TranceGate, value: f32) {
-    context.set_sample_rate(value);
+pub unsafe extern "C" fn set_sample_rate(trance_gate: &mut trance_gate::TranceGate, value: f32) {
+    trance_gate.set_sample_rate(value);
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn set_step(
-    context: &mut trance_gate::TranceGate,
+    trance_gate: &mut trance_gate::TranceGate,
     channel: usize,
     step: usize,
     value_normalized: f32,
 ) {
-    context.set_step(channel, step, value_normalized);
+    trance_gate.set_step(channel, step, value_normalized);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn set_width(context: &mut trance_gate::TranceGate, value: f32) {
-    context.set_width(value);
+pub unsafe extern "C" fn set_width(trance_gate: &mut trance_gate::TranceGate, value: f32) {
+    trance_gate.set_width(value);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn set_shuffle_amount(context: &mut trance_gate::TranceGate, value: f32) {
-    context.set_shuffle_amount(value);
+pub unsafe extern "C" fn set_shuffle_amount(trance_gate: &mut trance_gate::TranceGate, value: f32) {
+    trance_gate.set_shuffle_amount(value);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn set_stereo_mode(context: &mut trance_gate::TranceGate, value: bool) {
-    context.set_stereo_mode(value);
+pub unsafe extern "C" fn set_stereo_mode(trance_gate: &mut trance_gate::TranceGate, value: bool) {
+    trance_gate.set_stereo_mode(value);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn set_step_len(context: &mut trance_gate::TranceGate, value: f32) {
-    context.set_step_len(value);
+pub unsafe extern "C" fn set_step_len(trance_gate: &mut trance_gate::TranceGate, value: f32) {
+    trance_gate.set_step_len(value);
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn update_project_time_music(
-    context: &mut trance_gate::TranceGate,
+    trance_gate: &mut trance_gate::TranceGate,
     value: f64,
 ) {
-    context.update_project_time_music(value);
+    trance_gate.update_project_time_music(value);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn set_step_count(context: &mut trance_gate::TranceGate, value: usize) {
-    context.set_step_count(value);
+pub unsafe extern "C" fn set_step_count(trance_gate: &mut trance_gate::TranceGate, value: usize) {
+    trance_gate.set_step_count(value);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn set_contour(context: &mut trance_gate::TranceGate, value_secs: f32) {
-    context.set_contour(value_secs);
+pub unsafe extern "C" fn set_contour(trance_gate: &mut trance_gate::TranceGate, value_secs: f32) {
+    trance_gate.set_contour(value_secs);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn set_fade_in(context: &mut trance_gate::TranceGate, value: f32) {
-    context.set_fade_in(value);
+pub unsafe extern "C" fn set_fade_in(trance_gate: &mut trance_gate::TranceGate, value: f32) {
+    trance_gate.set_fade_in(value);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn set_delay(context: &mut trance_gate::TranceGate, value: f32) {
-    context.set_delay(value);
+pub unsafe extern "C" fn set_delay(trance_gate: &mut trance_gate::TranceGate, value: f32) {
+    trance_gate.set_delay(value);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn set_mix(context: &mut trance_gate::TranceGate, value: f32) {
-    context.set_mix(value);
+pub unsafe extern "C" fn set_mix(trance_gate: &mut trance_gate::TranceGate, value: f32) {
+    trance_gate.set_mix(value);
 }
