@@ -10,10 +10,13 @@ edition = "2021"
 cbindgen = "0.20.0"
 
 [lib]
-crate-type = ["staticlib"]
+crate-type = ["staticlib"] # Create a static C lib.
 
 [profile.release]
-lto = true
+strip = true      # Automatically strip symbols from the binary.
+lto = true        # Enable Link Time Optimization
+codegen-units = 1 # Reduce number of codegen units to increase optimizations.
+panic = "abort"   # Abort on panic
 
 [dependencies]
 dsp-tool-box-rs = { git = "https://github.com/hansen-audio/dsp-tool-box-rs.git", branch = "main" }
