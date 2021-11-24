@@ -5,14 +5,14 @@ use crate::{trance_gate, AudioFrame};
 //-----------------------------------------------------------------------------
 // https://firefox-source-docs.mozilla.org/writing-rust-code/ffi.html
 #[no_mangle]
-pub unsafe extern "C" fn tg_create() -> *mut trance_gate::TranceGate {
-    let context = trance_gate::TranceGate::new();
-    Box::into_raw(Box::new(context))
+pub unsafe extern "C" fn create() -> *mut trance_gate::TranceGate {
+    let trance_gate = trance_gate::TranceGate::new();
+    Box::into_raw(Box::new(trance_gate))
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn tg_destroy(context: *mut trance_gate::TranceGate) {
-    drop(Box::from_raw(context));
+pub unsafe extern "C" fn destroy(trance_gate: *mut trance_gate::TranceGate) {
+    drop(Box::from_raw(trance_gate));
 }
 
 //-----------------------------------------------------------------------------
