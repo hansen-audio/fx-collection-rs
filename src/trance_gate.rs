@@ -149,8 +149,8 @@ impl TranceGate {
             .for_each(|item| item.reset(reset_val));
     }
 
-    pub fn reset_step_pos(&mut self, value: usize) {
-        self.step_val.pos = value;
+    pub fn reset_step_pos(&mut self, step_pos: usize) {
+        self.step_val.pos = step_pos;
     }
 
     pub fn step_pos(&self) -> usize {
@@ -164,13 +164,13 @@ impl TranceGate {
         }
 
         let pos = self.step_val.pos;
-        let mut value_le = self.channel_steps_list[L][pos];
-        let mut value_ri = self.channel_steps_list[self.ch][pos];
+        let mut left = self.channel_steps_list[L][pos];
+        let mut right = self.channel_steps_list[self.ch][pos];
 
-        self.apply_effect(&mut value_le, &mut value_ri);
+        self.apply_effect(&mut left, &mut right);
 
-        outputs[L] = inputs[L] * value_le;
-        outputs[R] = inputs[R] * value_ri;
+        outputs[L] = inputs[L] * left;
+        outputs[R] = inputs[R] * right;
 
         self.update_phases()
     }
@@ -190,94 +190,90 @@ impl TranceGate {
         Self::set_shuffle(&mut self.step_val, self.step_phase.note_len());
     }
 
-    pub fn set_sample_rate(&mut self, value: f32) {
-        use filtering::one_pole_filter::OnePole;
+    pub fn set_sample_rate(&mut self, sample_rate: f32) {
+        self.sample_rate = sample_rate;
 
-        self.delay_phase.set_sample_rate(value);
-        self.fade_in_phase.set_sample_rate(value);
-        self.step_phase.set_sample_rate(value);
+        self.delay_phase.set_sample_rate(sample_rate);
+        self.fade_in_phase.set_sample_rate(sample_rate);
+        self.step_phase.set_sample_rate(sample_rate);
 
-        self.sample_rate = value;
-
-        let contour = self.contour;
-        self.contour_filters.iter_mut().for_each(|item| {
-            let pole = OnePole::tau_to_pole(contour, value);
-            item.update_pole(pole);
-        });
+        self.update_filter_poles();
     }
 
     pub fn set_step(&mut self, channel: usize, step: usize, value_normalized: f32) {
         self.channel_steps_list[channel][step] = value_normalized;
     }
 
-    pub fn set_width(&mut self, value: f32) {
-        self.width = 1. - value;
+    pub fn set_width(&mut self, width: f32) {
+        self.width = 1. - width;
     }
 
-    pub fn set_shuffle_amount(&mut self, value: f32) {
-        self.shuffle = value;
+    pub fn set_shuffle_amount(&mut self, shuffle: f32) {
+        self.shuffle = shuffle;
     }
 
-    pub fn set_stereo_mode(&mut self, value: bool) {
-        self.ch = match value {
+    pub fn set_stereo_mode(&mut self, mode: bool) {
+        self.ch = match mode {
             true => R,
             false => L,
         }
     }
 
-    pub fn set_step_len(&mut self, value: f32) {
-        self.step_phase.set_note_len(value);
+    pub fn set_step_len(&mut self, step_len: f32) {
+        self.step_phase.set_note_len(step_len);
     }
 
-    pub fn update_project_time_music(&mut self, value: f64) {
-        self.delay_phase.set_project_time(value);
-        self.fade_in_phase.set_project_time(value);
-        self.step_phase.set_project_time(value);
+    pub fn update_project_time_music(&mut self, project_time_music: f64) {
+        self.delay_phase.set_project_time(project_time_music);
+        self.fade_in_phase.set_project_time(project_time_music);
+        self.step_phase.set_project_time(project_time_music);
     }
 
-    pub fn set_step_count(&mut self, value: usize) {
-        self.step_val.count = value.clamp(MIN_NUM_STEPS, MAX_NUM_STEPS);
+    pub fn set_step_count(&mut self, step_count: usize) {
+        self.step_val.count = step_count.clamp(MIN_NUM_STEPS, MAX_NUM_STEPS);
     }
 
-    pub fn set_contour(&mut self, value_secs: f32) {
-        use filtering::one_pole_filter::OnePole;
-
-        if self.contour == value_secs {
+    pub fn set_contour(&mut self, contour: f32) {
+        if self.contour == contour {
             return;
         }
 
-        self.contour = value_secs;
-        let contour = self.contour;
-        let sample_rate = self.sample_rate;
-        self.contour_filters.iter_mut().for_each(|item| {
-            let pole = OnePole::tau_to_pole(contour, sample_rate);
-            item.update_pole(pole);
-        });
+        self.contour = contour;
+        self.update_filter_poles();
     }
 
-    pub fn set_fade_in(&mut self, value: f32) {
-        self.is_fade_in_active = value > 0.;
+    pub fn set_fade_in(&mut self, fade_in: f32) {
+        self.is_fade_in_active = fade_in > 0.;
         if !self.is_fade_in_active {
             return;
         }
 
-        self.fade_in_phase.set_note_len(value);
+        self.fade_in_phase.set_note_len(fade_in);
     }
 
-    pub fn set_delay(&mut self, value: f32) {
-        self.is_delay_active = value > 0.;
+    pub fn set_delay(&mut self, delay: f32) {
+        self.is_delay_active = delay > 0.;
         if !self.is_delay_active {
             return;
         }
 
-        self.delay_phase.set_note_len(value);
+        self.delay_phase.set_note_len(delay);
     }
 
-    pub fn set_mix(&mut self, value: f32) {
-        self.mix = value;
+    pub fn set_mix(&mut self, mix: f32) {
+        self.mix = mix;
     }
 
     // private
+    fn update_filter_poles(&mut self) {
+        use filtering::one_pole_filter::OnePole;
+
+        let pole = OnePole::tau_to_pole(self.contour, self.sample_rate);
+        self.contour_filters.iter_mut().for_each(|item| {
+            item.update_pole(pole);
+        });
+    }
+
     fn is_delay_running(&mut self) -> bool {
         let is_overflow = self
             .delay_phase
@@ -286,31 +282,31 @@ impl TranceGate {
         !is_overflow && self.is_delay_active
     }
 
-    fn apply_effect(&mut self, value_le: &mut f32, value_ri: &mut f32) {
-        self.apply_shuffle(value_le, value_ri);
-        self.apply_width(value_le, value_ri);
-        self.apply_contour(value_le, value_ri);
-        self.apply_mix_stereo(value_le, value_ri);
+    fn apply_effect(&mut self, left: &mut f32, right: &mut f32) {
+        self.apply_shuffle(left, right);
+        self.apply_width(left, right);
+        self.apply_contour(left, right);
+        self.apply_mix_stereo(left, right);
     }
 
-    fn apply_shuffle(&mut self, value_le: &mut f32, value_ri: &mut f32) {
+    fn apply_shuffle(&mut self, left: &mut f32, right: &mut f32) {
         // TODO: Is this a good value for a MAX_DELAY?
         const MAX_DELAY: f32 = 3. / 4.;
         let delay = self.shuffle * MAX_DELAY;
 
         if self.step_val.is_shuffle {
-            Self::apply_gate_delay(value_le, value_ri, self.step_phase_val, delay);
+            Self::apply_gate_delay(left, right, self.step_phase_val, delay);
         }
     }
 
-    fn apply_width(&self, value_le: &mut f32, value_ri: &mut f32) {
-        *value_le = value_le.max(*value_le * self.width);
-        *value_ri = value_ri.max(*value_ri * self.width);
+    fn apply_width(&self, left: &mut f32, right: &mut f32) {
+        *left = left.max(*left * self.width);
+        *right = right.max(*right * self.width);
     }
 
-    fn apply_contour(&mut self, value_le: &mut f32, value_ri: &mut f32) {
-        *value_le = self.contour_filters[L].process(*value_le);
-        *value_ri = self.contour_filters[R].process(*value_ri);
+    fn apply_contour(&mut self, left: &mut f32, right: &mut f32) {
+        *left = self.contour_filters[L].process(*left);
+        *right = self.contour_filters[R].process(*right);
     }
 
     fn compute_mix(&self) -> f32 {
@@ -325,20 +321,20 @@ impl TranceGate {
         *value = (MIX_MAX - mix) + *value * mix;
     }
 
-    fn apply_mix_stereo(&self, value_le: &mut f32, value_ri: &mut f32) {
+    fn apply_mix_stereo(&self, left: &mut f32, right: &mut f32) {
         let mix = self.compute_mix();
-        Self::apply_mix(value_le, mix);
-        Self::apply_mix(value_ri, mix);
+        Self::apply_mix(left, mix);
+        Self::apply_mix(right, mix);
     }
 
-    fn apply_gate_delay(value_le: &mut f32, value_ri: &mut f32, phase_value: f32, delay: f32) {
+    fn apply_gate_delay(left: &mut f32, right: &mut f32, phase_value: f32, delay: f32) {
         let factor = match phase_value > delay {
             true => 1.,
             false => 0.,
         };
 
-        *value_le = *value_le * factor;
-        *value_ri = *value_ri * factor;
+        *left = *left * factor;
+        *right = *right * factor;
     }
 
     fn set_shuffle(step: &mut Step, note_len: f32) {
