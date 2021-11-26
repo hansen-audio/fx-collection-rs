@@ -1,5 +1,8 @@
 // Copyright(c) 2021 Hansen Audio.
 
+// See Cargo.toml, and put crate-type to "lib" to make the unit tests run.
+
+/*
 use fx_collection_rs::trance_gate::*;
 
 #[cfg(test)]
@@ -14,3 +17,4 @@ mod tests {
         println!("{:#?}", trance_gate);
     }
 }
+*/
