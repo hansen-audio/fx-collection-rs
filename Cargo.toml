@@ -10,7 +10,7 @@ edition = "2021"
 cbindgen = "0.20.0"
 
 [lib]
-crate-type = ["staticlib"] # Create a static C lib.
+crate-type = ["staticlib", "rlib"] # Create a static C lib.
 
 [profile.release]
 # strip = true      # Automatically strip symbols from the binary.

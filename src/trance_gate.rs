@@ -341,15 +341,3 @@ impl TranceGate {
         step.is_shuffle = is_shuffle_note(step.pos, note_len);
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use crate::trance_gate::TranceGate;
-
-    #[test]
-    #[ignore]
-    fn test_trance_gate_debug_print() {
-        let trance_gate = TranceGate::new();
-        println!("{:#?}", trance_gate);
-    }
-}
