@@ -4,6 +4,7 @@ use dsp_tool_box_rs::filtering;
 use dsp_tool_box_rs::modulation;
 
 use super::detail::shuffle_note::is_shuffle_note;
+use crate::AudioFrame;
 use crate::NUM_CHANNELS;
 
 #[derive(Debug, Clone)]
@@ -30,16 +31,10 @@ impl Step {
     }
 }
 
-const MIN_NUM_STEPS: usize = 1;
 const MAX_NUM_STEPS: usize = 32;
-const ONE_SAMPLE: usize = 1;
-const L: usize = 0;
-const R: usize = 1;
-
 type StepVals = [f32; MAX_NUM_STEPS];
 type ChannelStepsList = [StepVals; NUM_CHANNELS];
 type ContourFiltersList = [filtering::one_pole_filter::OnePole; NUM_CHANNELS];
-type AudioFrame = [f32; NUM_CHANNELS];
 
 #[derive(Debug, Clone)]
 pub struct TranceGate {
@@ -63,6 +58,11 @@ pub struct TranceGate {
 }
 
 impl TranceGate {
+    const L: usize = 0;
+    const R: usize = 1;
+    const MIN_NUM_STEPS: usize = 1;
+    const ONE_SAMPLE: usize = 1;
+
     pub fn new() -> Self {
         use filtering::one_pole_filter::OnePole;
         use modulation::phase::Phase;
@@ -164,24 +164,24 @@ impl TranceGate {
         }
 
         let pos = self.step_val.pos;
-        let mut left = self.channel_steps_list[L][pos];
+        let mut left = self.channel_steps_list[Self::L][pos];
         let mut right = self.channel_steps_list[self.ch][pos];
 
         self.apply_effect(&mut left, &mut right);
 
-        outputs[L] = inputs[L] * left;
-        outputs[R] = inputs[R] * right;
+        outputs[Self::L] = inputs[Self::L] * left;
+        outputs[Self::R] = inputs[Self::R] * right;
 
         self.update_phases()
     }
 
     fn update_phases(&mut self) {
         self.fade_in_phase
-            .advance_one_shot(&mut self.fade_in_phase_val, ONE_SAMPLE);
+            .advance_one_shot(&mut self.fade_in_phase_val, Self::ONE_SAMPLE);
 
         let is_overflow = self
             .step_phase
-            .advance(&mut self.step_phase_val, ONE_SAMPLE);
+            .advance(&mut self.step_phase_val, Self::ONE_SAMPLE);
 
         if !is_overflow {
             return;
@@ -214,8 +214,8 @@ impl TranceGate {
 
     pub fn set_stereo_mode(&mut self, mode: bool) {
         self.ch = match mode {
-            true => R,
-            false => L,
+            true => Self::R,
+            false => Self::L,
         }
     }
 
@@ -230,7 +230,7 @@ impl TranceGate {
     }
 
     pub fn set_step_count(&mut self, step_count: usize) {
-        self.step_val.count = step_count.clamp(MIN_NUM_STEPS, MAX_NUM_STEPS);
+        self.step_val.count = step_count.clamp(Self::MIN_NUM_STEPS, MAX_NUM_STEPS);
     }
 
     pub fn set_contour(&mut self, contour: f32) {
@@ -277,7 +277,7 @@ impl TranceGate {
     fn is_delay_running(&mut self) -> bool {
         let is_overflow = self
             .delay_phase
-            .advance_one_shot(&mut self.delay_phase_val, ONE_SAMPLE);
+            .advance_one_shot(&mut self.delay_phase_val, Self::ONE_SAMPLE);
 
         !is_overflow && self.is_delay_active
     }
@@ -305,8 +305,8 @@ impl TranceGate {
     }
 
     fn apply_contour(&mut self, left: &mut f32, right: &mut f32) {
-        *left = self.contour_filters[L].process(*left);
-        *right = self.contour_filters[R].process(*right);
+        *left = self.contour_filters[Self::L].process(*left);
+        *right = self.contour_filters[Self::R].process(*right);
     }
 
     fn compute_mix(&self) -> f32 {
