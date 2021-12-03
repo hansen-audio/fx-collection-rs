@@ -5,7 +5,7 @@ use crate::{trance_gate, AudioFrame};
 //-----------------------------------------------------------------------------
 // https://firefox-source-docs.mozilla.org/writing-rust-code/ffi.html
 #[no_mangle]
-pub unsafe extern "C" fn create() -> *mut trance_gate::TranceGate {
+pub unsafe extern "C" fn create_trance_gate() -> *mut trance_gate::TranceGate {
     let trance_gate = trance_gate::TranceGate::new();
     Box::into_raw(Box::new(trance_gate))
 }
