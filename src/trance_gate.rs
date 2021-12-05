@@ -34,12 +34,11 @@ impl Step {
 const MAX_NUM_STEPS: usize = 32;
 type StepVals = [f32; MAX_NUM_STEPS];
 type ChannelStepsList = [StepVals; NUM_CHANNELS];
-type ContourFiltersList = [filtering::one_pole_filter::OnePole; NUM_CHANNELS];
 
 #[derive(Debug, Clone)]
 pub struct TranceGate {
     channel_steps_list: ChannelStepsList,
-    contour_filters: ContourFiltersList,
+    contour_filter: filtering::one_pole_filter::OnePoleMulti,
     delay_phase: modulation::phase::Phase,
     fade_in_phase: modulation::phase::Phase,
     step_phase: modulation::phase::Phase,
@@ -64,18 +63,13 @@ impl TranceGate {
     const ONE_SAMPLE: usize = 1;
 
     pub fn new() -> Self {
-        use filtering::one_pole_filter::OnePole;
+        use filtering::one_pole_filter::OnePoleMulti;
         use modulation::phase::Phase;
         use modulation::phase::SyncMode;
 
         let mut trance_gate = Self {
             channel_steps_list: [[0.; MAX_NUM_STEPS]; NUM_CHANNELS],
-            contour_filters: [
-                OnePole::new(0.9),
-                OnePole::new(0.9),
-                OnePole::new(0.9),
-                OnePole::new(0.9),
-            ],
+            contour_filter: OnePoleMulti::new(0.),
             delay_phase: modulation::phase::Phase::new(),
             fade_in_phase: modulation::phase::Phase::new(),
             step_phase: modulation::phase::Phase::new(),
@@ -144,9 +138,7 @@ impl TranceGate {
             false => 0.,
         };
 
-        self.contour_filters
-            .iter_mut()
-            .for_each(|item| item.reset(reset_val));
+        self.contour_filter.reset(reset_val);
     }
 
     pub fn reset_step_pos(&mut self, step_pos: usize) {
@@ -269,9 +261,7 @@ impl TranceGate {
         use filtering::one_pole_filter::OnePole;
 
         let pole = OnePole::tau_to_pole(self.contour, self.sample_rate);
-        self.contour_filters.iter_mut().for_each(|item| {
-            item.update_pole(pole);
-        });
+        self.contour_filter.update_pole(pole);
     }
 
     fn is_delay_running(&mut self) -> bool {
@@ -305,8 +295,12 @@ impl TranceGate {
     }
 
     fn apply_contour(&mut self, left: &mut f32, right: &mut f32) {
-        *left = self.contour_filters[Self::L].process(*left);
-        *right = self.contour_filters[Self::R].process(*right);
+        // TODO: Make this a bit prettier!
+        let input = [*left, *right, 0., 0.];
+        let mut output = [0., 0., 0., 0.];
+        self.contour_filter.process(&input, &mut output);
+        *left = output[Self::L];
+        *right = output[Self::R];
     }
 
     fn compute_mix(&self) -> f32 {
