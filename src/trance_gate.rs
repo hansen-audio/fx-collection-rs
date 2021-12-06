@@ -295,10 +295,8 @@ impl TranceGate {
     }
 
     fn apply_contour(&mut self, left: &mut f32, right: &mut f32) {
-        // TODO: Make this a bit prettier!
         let input = [*left, *right, 0., 0.];
-        let mut output = [0., 0., 0., 0.];
-        self.contour_filter.process(&input, &mut output);
+        let output = self.contour_filter.process(&input);
         *left = output[Self::L];
         *right = output[Self::R];
     }
