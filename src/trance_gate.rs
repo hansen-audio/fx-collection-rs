@@ -258,10 +258,7 @@ impl TranceGate {
 
     // private
     fn update_filter_poles(&mut self) {
-        use filtering::one_pole_filter::OnePole;
-
-        let pole = OnePole::tau_to_pole(self.contour, self.sample_rate);
-        self.contour_filter.update_pole(pole);
+        self.contour_filter.set_tau(self.contour, self.sample_rate);
     }
 
     fn is_delay_running(&mut self) -> bool {
