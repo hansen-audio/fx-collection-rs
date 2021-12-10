@@ -11,7 +11,7 @@ pub unsafe extern "C" fn create_trance_gate() -> *mut trance_gate::TranceGate {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn destroy(trance_gate: *mut trance_gate::TranceGate) {
+pub unsafe extern "C" fn destroy_trance_gate(trance_gate: *mut trance_gate::TranceGate) {
     drop(Box::from_raw(trance_gate));
 }
 
