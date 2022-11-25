@@ -42,7 +42,7 @@ pub unsafe extern "C" fn reset_step_pos(trance_gate: &mut trance_gate::TranceGat
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn get_step_pos(trance_gate: &mut trance_gate::TranceGate) -> usize {
+pub unsafe extern "C" fn get_step_pos(trance_gate: &trance_gate::TranceGate) -> usize {
     trance_gate.step_pos()
 }
 
