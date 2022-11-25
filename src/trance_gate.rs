@@ -301,8 +301,8 @@ impl TranceGate {
             false => 0.,
         };
 
-        *left = *left * factor;
-        *right = *right * factor;
+        *left *= factor;
+        *right *= factor;
     }
 
     fn set_shuffle(step: &mut step::Step, note_len: f32) {
