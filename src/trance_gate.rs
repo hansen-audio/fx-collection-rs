@@ -309,3 +309,15 @@ impl TranceGate {
         step.set_note_len(note_len);
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn test_trance_gate_debug_print() {
+        let trance_gate = TranceGate::new();
+        println!("{:#?}", trance_gate);
+    }
+}
