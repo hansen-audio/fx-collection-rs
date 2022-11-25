@@ -3,33 +3,11 @@
 use dsp_tool_box_rs::filtering;
 use dsp_tool_box_rs::modulation;
 
-use super::detail::shuffle_note::is_shuffle_note;
+mod shuffle_note;
+mod step;
+
 use crate::AudioFrame;
 use crate::NUM_CHANNELS;
-
-#[derive(Debug, Clone)]
-struct Step {
-    pos: usize,
-    count: usize,
-    is_shuffle: bool,
-}
-
-impl Step {
-    fn new(pos: usize, count: usize, is_shuffle: bool) -> Self {
-        Self {
-            pos,
-            count,
-            is_shuffle,
-        }
-    }
-
-    fn advance(&mut self) {
-        self.pos += 1;
-        if self.pos >= self.count {
-            self.pos = 0;
-        }
-    }
-}
 
 const MAX_NUM_STEPS: usize = 32;
 type StepVals = [f32; MAX_NUM_STEPS];
@@ -45,7 +23,7 @@ pub struct TranceGate {
     delay_phase_val: f32,
     step_phase_val: f32,
     fade_in_phase_val: f32,
-    step_val: Step,
+    step_val: step::Step,
     mix: f32,
     width: f32,
     shuffle: f32,
@@ -76,7 +54,7 @@ impl TranceGate {
             delay_phase_val: 0.,
             fade_in_phase_val: 0.,
             step_phase_val: 0.,
-            step_val: Step::new(0, 32, false),
+            step_val: step::Step::new(0, 32, false),
             mix: 0.5,
             width: 0.,
             shuffle: 0.,
@@ -125,7 +103,7 @@ impl TranceGate {
         self.delay_phase_val = 0.;
         self.fade_in_phase_val = 0.;
         self.step_phase_val = 0.;
-        self.step_val.pos = 0;
+        self.step_val.set_pos(0);
 
         if self.is_delay_active {
             self.reset();
@@ -142,11 +120,11 @@ impl TranceGate {
     }
 
     pub fn reset_step_pos(&mut self, step_pos: usize) {
-        self.step_val.pos = step_pos;
+        self.step_val.set_pos(step_pos);
     }
 
     pub fn step_pos(&self) -> usize {
-        self.step_val.pos
+        self.step_val.pos()
     }
 
     pub fn process(&mut self, inputs: &AudioFrame, outputs: &mut AudioFrame) {
@@ -155,7 +133,7 @@ impl TranceGate {
             return;
         }
 
-        let pos = self.step_val.pos;
+        let pos = self.step_val.pos();
         let mut left = self.channel_steps_list[Self::L][pos];
         let mut right = self.channel_steps_list[self.ch][pos];
 
@@ -222,7 +200,8 @@ impl TranceGate {
     }
 
     pub fn set_step_count(&mut self, step_count: usize) {
-        self.step_val.count = step_count.clamp(Self::MIN_NUM_STEPS, MAX_NUM_STEPS);
+        self.step_val
+            .set_count(step_count.clamp(Self::MIN_NUM_STEPS, MAX_NUM_STEPS));
     }
 
     pub fn set_contour(&mut self, contour: f32) {
@@ -281,7 +260,7 @@ impl TranceGate {
         const MAX_DELAY: f32 = 3. / 4.;
         let delay = self.shuffle * MAX_DELAY;
 
-        if self.step_val.is_shuffle {
+        if self.step_val.is_shuffle() {
             Self::apply_gate_delay(left, right, self.step_phase_val, delay);
         }
     }
@@ -326,7 +305,7 @@ impl TranceGate {
         *right = *right * factor;
     }
 
-    fn set_shuffle(step: &mut Step, note_len: f32) {
-        step.is_shuffle = is_shuffle_note(step.pos, note_len);
+    fn set_shuffle(step: &mut step::Step, note_len: f32) {
+        step.set_note_len(note_len);
     }
 }
