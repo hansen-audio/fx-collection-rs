@@ -24,6 +24,12 @@ cargo build
 cargo test
 ```
 
+## Using cbindgen
+
+This library uses ```cbindgen``` to generate a C++ header. Like this the library can be used in C++ projects as well.
+
+> See ```Cargo.toml```, ```cbindgen.toml``` and ```build.rs``` to understand how to generate the ```include/ha/fx-collection-rs/cbindings.h``` header file.
+
 ## Effects
 
 Currently the following effects are avaiable:
@@ -41,6 +47,8 @@ For the trance gate for instance, use the ```trance_gate::Context::new()``` meth
 #### Processing an effect
 
 TODO
+
+
 
 ## License
 
