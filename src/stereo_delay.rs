@@ -2,6 +2,9 @@
 
 use crate::AudioFrame;
 
+use dsp_tool_box_rs::filtering;
+
+#[derive(Clone, Copy)]
 struct DelayLineHeads {
     read_head: f32,
     write_head: usize,
@@ -25,7 +28,7 @@ impl DelayLineHeads {
 
     pub fn advance(&mut self) {
         let tmp_diff = (self.current_diff() - self.heads_diff_dst).abs();
-        self.write_head = self.write_head + 1;
+        self.write_head += 1;
         self.read_head = if tmp_diff > 1. {
             self.read_head + self.read_head_increment
         } else {
@@ -94,7 +97,8 @@ impl DelayLineHeads {
     }
 }
 
-pub struct DelayLine {
+#[derive(Clone)]
+struct DelayLine {
     original_buffer: Vec<f32>,
     feedback: f32,
     last_out: f32,
@@ -115,13 +119,13 @@ impl DelayLine {
         delay_line
     }
 
-    pub fn process(&mut self, inputs: &AudioFrame, outputs: &mut AudioFrame) {
+    pub fn process(&mut self, input: f32) -> f32 {
         self.last_out = self.read_out(self.delay_line_heads.read_head()) * self.feedback;
-        self.original_buffer[self.delay_line_heads.write_head()] = inputs[0] + self.last_out;
+        self.original_buffer[self.delay_line_heads.write_head()] = input + self.last_out;
 
         self.delay_line_heads.advance();
 
-        outputs[0] = self.last_out
+        self.last_out
     }
 
     pub fn set_normalized_delay(&mut self, speed: f32) {
@@ -152,12 +156,73 @@ impl DelayLine {
         let mut pos = play_back_pos as usize;
         let fraction = play_back_pos - pos as f32;
 
-        pos = pos + 1;
+        pos += 1;
         let a = self.original_buffer[pos];
         pos = DelayLineHeads::bind_to_buffer(pos, buffer_size);
         let b = self.original_buffer[pos];
 
         a + (b - a) * fraction
+    }
+}
+
+const NUM_STEREO_DELAY_CHANNELS: usize = 2;
+const L: usize = 0;
+const R: usize = 1;
+
+struct DelayLineStereo {
+    delay_lines: Vec<DelayLine>,
+    hi_pass: filtering::one_pole_filter::OnePoleMulti,
+    lo_pass: filtering::one_pole_filter::OnePoleMulti,
+}
+
+impl DelayLineStereo {
+    fn new() -> Self {
+        Self {
+            delay_lines: vec![DelayLine::new(); NUM_STEREO_DELAY_CHANNELS],
+            hi_pass: filtering::one_pole_filter::OnePoleMulti::new(0.),
+            lo_pass: filtering::one_pole_filter::OnePoleMulti::new(0.),
+        }
+    }
+
+    pub fn process(&mut self, inputs: &AudioFrame, outputs: &mut AudioFrame) {
+        for (pos, delay_line) in self.delay_lines.iter_mut().enumerate() {
+            outputs[pos] = delay_line.process(inputs[pos]);
+        }
+
+        *outputs = self.hi_pass.process(outputs);
+        *outputs = self.lo_pass.process(outputs);
+    }
+
+    pub fn set_normalized_delay_left(&mut self, speed: f32) {
+        self.delay_lines[L].set_normalized_delay(speed);
+    }
+
+    pub fn set_normalized_delay_right(&mut self, speed: f32) {
+        self.delay_lines[R].set_normalized_delay(speed);
+    }
+
+    pub fn set_feedback(&mut self, feedback: f32) {
+        for el in self.delay_lines.iter_mut() {
+            el.set_feedback(feedback);
+        }
+    }
+
+    pub fn clear_buffer(&mut self) {
+        for el in self.delay_lines.iter_mut() {
+            el.clear_buffer();
+        }
+    }
+
+    pub fn set_buffer_size(&mut self, size: usize) {
+        for el in self.delay_lines.iter_mut() {
+            el.set_buffer_size(size);
+        }
+    }
+
+    pub fn reset_heads(&mut self) {
+        for el in self.delay_lines.iter_mut() {
+            el.reset_heads();
+        }
     }
 }
 
@@ -167,20 +232,32 @@ mod tests {
 
     #[test]
     fn name() {
-        // let mut heads = DelayLineHeads::new();
-        // let out = heads.advance();
-
-        let inputs = [0. as f32; 4];
-        let mut outputs = [0. as f32; 4];
+        let inputs = 0. as f32;
         let mut delay_line = DelayLine::new();
         delay_line.set_buffer_size(44100);
         delay_line.set_normalized_delay(0.5);
         delay_line.set_feedback(0.5);
         delay_line.set_normalized_delay(0.5);
 
-        delay_line.process(&inputs, &mut outputs);
+        let outputs = delay_line.process(inputs);
+        println!("{:?}", outputs);
 
         delay_line.clear_buffer();
         delay_line.reset_heads();
+    }
+
+    #[test]
+    fn test_delay_line_multi() {
+        let inputs = [0. as f32; 4];
+        let mut outputs = [0. as f32; 4];
+        let mut delay_line = DelayLineStereo::new();
+        delay_line.set_buffer_size(44100);
+        delay_line.set_normalized_delay_left(0.5);
+        delay_line.set_normalized_delay_right(0.5);
+        delay_line.set_feedback(0.5);
+        delay_line.clear_buffer();
+        delay_line.reset_heads();
+
+        delay_line.process(&inputs, &mut outputs);
     }
 }
