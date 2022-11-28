@@ -1,6 +1,6 @@
 // Copyright(c) 2021 Hansen Audio.
 
-use crate::{trance_gate, AudioFrame};
+use crate::{stereo_delay, trance_gate, AudioFrame};
 
 //-----------------------------------------------------------------------------
 // https://firefox-source-docs.mozilla.org/writing-rust-code/ffi.html
@@ -14,8 +14,6 @@ pub unsafe extern "C" fn create_trance_gate() -> *mut trance_gate::TranceGate {
 pub unsafe extern "C" fn destroy_trance_gate(trance_gate: *mut trance_gate::TranceGate) {
     drop(Box::from_raw(trance_gate));
 }
-
-//-----------------------------------------------------------------------------
 
 #[no_mangle]
 pub unsafe extern "C" fn set_tempo(trance_gate: &mut trance_gate::TranceGate, tempo_bpm: f32) {
@@ -121,4 +119,65 @@ pub unsafe extern "C" fn set_delay(trance_gate: &mut trance_gate::TranceGate, va
 #[no_mangle]
 pub unsafe extern "C" fn set_mix(trance_gate: &mut trance_gate::TranceGate, value: f32) {
     trance_gate.set_mix(value);
+}
+
+//-----------------------------------------------------------------------------
+// https://firefox-source-docs.mozilla.org/writing-rust-code/ffi.html
+#[no_mangle]
+pub unsafe extern "C" fn create_stereo_delay() -> *mut stereo_delay::StereoDelay {
+    let stereo_delay = stereo_delay::StereoDelay::new();
+    Box::into_raw(Box::new(stereo_delay))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn destroy_stereo_delay(stereo_delay: *mut stereo_delay::StereoDelay) {
+    drop(Box::from_raw(stereo_delay));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn process_stereo_delay(
+    stereo_delay: &mut stereo_delay::StereoDelay,
+    inputs: &AudioFrame,
+    outputs: &mut AudioFrame,
+) {
+    stereo_delay.process(inputs, outputs);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn set_normalized_delay_left(
+    stereo_delay: &mut stereo_delay::StereoDelay,
+    speed: f32,
+) {
+    stereo_delay.set_normalized_delay_left(speed);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn set_normalized_delay_right(
+    stereo_delay: &mut stereo_delay::StereoDelay,
+    speed: f32,
+) {
+    stereo_delay.set_normalized_delay_right(speed);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn set_feedback(stereo_delay: &mut stereo_delay::StereoDelay, feedback: f32) {
+    stereo_delay.set_feedback(feedback);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn clear_buffer(stereo_delay: &mut stereo_delay::StereoDelay) {
+    stereo_delay.clear_buffer();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn set_buffer_size(
+    stereo_delay: &mut stereo_delay::StereoDelay,
+    size: usize,
+) {
+    stereo_delay.set_buffer_size(size);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn reset_heads(stereo_delay: &mut stereo_delay::StereoDelay) {
+    stereo_delay.reset_heads();
 }
