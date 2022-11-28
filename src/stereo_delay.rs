@@ -165,20 +165,20 @@ impl DelayLine {
     }
 }
 
-const NUM_STEREO_DELAY_CHANNELS: usize = 2;
-const L: usize = 0;
-const R: usize = 1;
-
-struct DelayLineStereo {
+pub struct StereoDelay {
     delay_lines: Vec<DelayLine>,
     hi_pass: filtering::one_pole_filter::OnePoleMulti,
     lo_pass: filtering::one_pole_filter::OnePoleMulti,
 }
 
-impl DelayLineStereo {
-    fn new() -> Self {
+impl StereoDelay {
+    const NUM_STEREO_DELAY_CHANNELS: usize = 2;
+    const L: usize = 0;
+    const R: usize = 1;
+
+    pub fn new() -> Self {
         Self {
-            delay_lines: vec![DelayLine::new(); NUM_STEREO_DELAY_CHANNELS],
+            delay_lines: vec![DelayLine::new(); Self::NUM_STEREO_DELAY_CHANNELS],
             hi_pass: filtering::one_pole_filter::OnePoleMulti::new(0.),
             lo_pass: filtering::one_pole_filter::OnePoleMulti::new(0.),
         }
@@ -194,11 +194,11 @@ impl DelayLineStereo {
     }
 
     pub fn set_normalized_delay_left(&mut self, speed: f32) {
-        self.delay_lines[L].set_normalized_delay(speed);
+        self.delay_lines[Self::L].set_normalized_delay(speed);
     }
 
     pub fn set_normalized_delay_right(&mut self, speed: f32) {
-        self.delay_lines[R].set_normalized_delay(speed);
+        self.delay_lines[Self::R].set_normalized_delay(speed);
     }
 
     pub fn set_feedback(&mut self, feedback: f32) {
@@ -250,7 +250,7 @@ mod tests {
     fn test_delay_line_multi() {
         let inputs = [0. as f32; 4];
         let mut outputs = [0. as f32; 4];
-        let mut delay_line = DelayLineStereo::new();
+        let mut delay_line = StereoDelay::new();
         delay_line.set_buffer_size(44100);
         delay_line.set_normalized_delay_left(0.5);
         delay_line.set_normalized_delay_right(0.5);
