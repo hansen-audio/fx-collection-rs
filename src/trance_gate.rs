@@ -16,7 +16,7 @@ type ChannelStepsList = [StepVals; NUM_CHANNELS];
 #[derive(Debug, Clone)]
 pub struct TranceGate {
     channel_steps_list: ChannelStepsList,
-    contour_filter: filtering::one_pole_filter::OnePoleMulti,
+    contour_filter: filtering::one_pole_simple::OnePoleSimpleMulti,
     delay_phase: modulation::phase::Phase,
     fade_in_phase: modulation::phase::Phase,
     step_phase: modulation::phase::Phase,
@@ -41,13 +41,13 @@ impl TranceGate {
     const ONE_SAMPLE: usize = 1;
 
     pub fn new() -> Self {
-        use filtering::one_pole_filter::OnePoleMulti;
+        use filtering::one_pole_simple::OnePoleSimpleMulti;
         use modulation::phase::Phase;
         use modulation::phase::SyncMode;
 
         let mut trance_gate = Self {
             channel_steps_list: [[0.; MAX_NUM_STEPS]; NUM_CHANNELS],
-            contour_filter: OnePoleMulti::new(0.),
+            contour_filter: OnePoleSimpleMulti::new(0.),
             delay_phase: modulation::phase::Phase::new(),
             fade_in_phase: modulation::phase::Phase::new(),
             step_phase: modulation::phase::Phase::new(),
