@@ -181,3 +181,21 @@ pub unsafe extern "C" fn set_buffer_size(
 pub unsafe extern "C" fn reset_heads(stereo_delay: &mut stereo_delay::StereoDelay) {
     stereo_delay.reset_heads();
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn set_sample_rate_stereo_delay(
+    stereo_delay: &mut stereo_delay::StereoDelay,
+    sample_rate: f32,
+) {
+    stereo_delay.set_sample_rate(sample_rate);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn set_lp_freq(stereo_delay: &mut stereo_delay::StereoDelay, freq: f32) {
+    stereo_delay.set_lp_freq(freq);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn set_hp_freq(stereo_delay: &mut stereo_delay::StereoDelay, freq: f32) {
+    stereo_delay.set_hp_freq(freq);
+}
