@@ -31,14 +31,14 @@ impl DelayLineHeads {
             self.write_head as f32 - self.heads_diff_dst
         };
 
-        self.read_head = Self::bind_to_buffer(self.read_head, self.buffer_size_f);
-        self.write_head = Self::bind_to_buffer(self.write_head, self.buffer_size);
+        self.read_head = Self::bind_to_buffer_f32(self.read_head, self.buffer_size_f);
+        self.write_head = Self::bind_to_buffer_usize(self.write_head, self.buffer_size);
     }
 
     pub fn reset(&mut self) {
         self.read_head = self.write_head as f32 - self.heads_diff_dst;
         self.read_head_increment = 1.;
-        self.read_head = Self::bind_to_buffer(self.read_head, self.buffer_size_f);
+        self.read_head = Self::bind_to_buffer_f32(self.read_head, self.buffer_size_f);
     }
 
     pub fn set_buffer_size(&mut self, buffer_size: usize) {
@@ -66,7 +66,7 @@ impl DelayLineHeads {
 
     fn current_diff(&self) -> f32 {
         let diff = (self.write_head as f32 + self.buffer_size_f) - self.read_head;
-        Self::bind_to_buffer(diff, self.buffer_size_f)
+        Self::bind_to_buffer_f32(diff, self.buffer_size_f)
     }
 
     pub fn read_head(&self) -> f32 {
@@ -77,18 +77,42 @@ impl DelayLineHeads {
         self.write_head
     }
 
+    fn bind_to_buffer_f32(index: f32, buffer_size: f32) -> f32 {
+        if index >= buffer_size {
+            index - buffer_size
+        } else if index < 0 as f32 {
+            index + buffer_size - (1 as f32)
+        } else {
+            index
+        }
+    }
+
+    pub fn bind_to_buffer_usize(index: usize, buffer_size: usize) -> usize {
+        if index >= buffer_size {
+            index - buffer_size
+        } else if index < 0 as usize {
+            index + buffer_size - (1 as usize)
+        } else {
+            index
+        }
+    }
+
+    /*
     pub fn bind_to_buffer<T>(index: T, buffer_size: T) -> T
     where
         T: Default
             + std::cmp::PartialOrd
             + std::ops::Sub<Output = T>
             + std::ops::Add<Output = T>
-            + std::ops::Rem<Output = T>,
+            + std::ops::Rem<Output = T>
+            + std::ops::Sub<Output = T>,
     {
-        if index < buffer_size {
-            index
+        if index >= buffer_size {
+            index - buffer_size
+        } else if index < 0 as T {
+            index + buffer_size - (1 as T)
         } else {
-            index % buffer_size
+            index
         }
-    }
+    }*/
 }
