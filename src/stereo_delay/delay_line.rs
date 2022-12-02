@@ -25,6 +25,12 @@ impl DelayLine {
             lp: filtering::one_pole::OnePole::new(),
         };
 
+        delay_line
+            .hp
+            .set_filter_type(filtering::one_pole::OnePoleType::HP);
+        delay_line
+            .lp
+            .set_filter_type(filtering::one_pole::OnePoleType::LP);
         delay_line.original_buffer.resize(8000, 0.);
         delay_line.delay_line_heads.set_buffer_size(8000);
         delay_line
