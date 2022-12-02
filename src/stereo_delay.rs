@@ -4,13 +4,9 @@ use crate::AudioFrame;
 
 mod delay_line;
 mod delay_line_heads;
-extern crate dsp_tool_box_rs;
-use dsp_tool_box_rs::filtering;
 
 pub struct StereoDelay {
     delay_lines: Vec<delay_line::DelayLine>,
-    hp: filtering::one_pole::OnePole,
-    lp: filtering::one_pole::OnePole,
 }
 
 impl StereoDelay {
@@ -19,15 +15,8 @@ impl StereoDelay {
     const R: usize = 1;
 
     pub fn new() -> Self {
-        let mut hp = filtering::one_pole::OnePole::new();
-        let mut lp = filtering::one_pole::OnePole::new();
-        hp.set_filter_type(filtering::one_pole::OnePoleType::HP);
-        lp.set_filter_type(filtering::one_pole::OnePoleType::TP);
-
         Self {
             delay_lines: vec![delay_line::DelayLine::new(); Self::NUM_STEREO_DELAY_CHANNELS],
-            hp,
-            lp,
         }
     }
 
@@ -35,9 +24,6 @@ impl StereoDelay {
         for (pos, delay_line) in self.delay_lines.iter_mut().enumerate() {
             outputs[pos] = delay_line.process(inputs[pos]);
         }
-
-        self.hp.process(inputs, outputs);
-        self.lp.process(inputs, outputs);
     }
 
     pub fn set_normalized_delay_left(&mut self, speed: f32) {
@@ -73,16 +59,21 @@ impl StereoDelay {
     }
 
     pub fn set_lp_freq(&mut self, freq: f32) {
-        self.lp.set_frequency(freq);
+        for el in self.delay_lines.iter_mut() {
+            el.set_lp_freq(freq);
+        }
     }
 
     pub fn set_hp_freq(&mut self, freq: f32) {
-        self.hp.set_frequency(freq);
+        for el in self.delay_lines.iter_mut() {
+            el.set_hp_freq(freq);
+        }
     }
 
     pub fn set_sample_rate(&mut self, sample_rate: f32) {
-        self.hp.set_sample_rate(sample_rate);
-        self.lp.set_sample_rate(sample_rate);
+        for el in self.delay_lines.iter_mut() {
+            el.set_sample_rate(sample_rate);
+        }
     }
 }
 
