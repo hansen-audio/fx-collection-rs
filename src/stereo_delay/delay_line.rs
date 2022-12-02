@@ -86,9 +86,9 @@ impl DelayLine {
         let mut pos = play_back_pos as usize;
         let fraction = play_back_pos - pos as f32;
 
-        pos += 1;
         let a = self.original_buffer[pos];
-        pos = delay_line_heads::DelayLineHeads::bind_to_buffer(pos, buffer_size);
+        pos += 1;
+        pos = delay_line_heads::DelayLineHeads::bind_to_buffer_usize(pos, buffer_size);
         let b = self.original_buffer[pos];
 
         a + (b - a) * fraction
