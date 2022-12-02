@@ -3,7 +3,7 @@
 use super::shuffle_note::is_shuffle_note;
 
 #[derive(Debug, Clone)]
-pub struct Step {
+pub(super) struct Step {
     pos: usize,
     count: usize,
     is_shuffle: bool,
