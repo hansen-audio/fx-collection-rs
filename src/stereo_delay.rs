@@ -4,9 +4,10 @@ use crate::AudioFrame;
 
 mod delay_line;
 mod delay_line_heads;
+use delay_line::DelayLine;
 
 pub struct StereoDelay {
-    delay_lines: Vec<delay_line::DelayLine>,
+    delay_lines: Vec<DelayLine>,
 }
 
 impl StereoDelay {
@@ -16,7 +17,7 @@ impl StereoDelay {
 
     pub fn new() -> Self {
         Self {
-            delay_lines: vec![delay_line::DelayLine::new(); Self::NUM_STEREO_DELAY_CHANNELS],
+            delay_lines: vec![DelayLine::new(); Self::NUM_STEREO_DELAY_CHANNELS],
         }
     }
 
