@@ -99,7 +99,9 @@ impl DelayLine {
     }
 
     fn filter(&mut self, input: f32) -> f32 {
-        self.lp.process_mono(self.hp.process_mono(input))
+        let mut val = self.hp.process_mono(input);
+        val = self.lp.process_mono(val);
+        val
     }
 }
 
