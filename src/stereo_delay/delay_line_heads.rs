@@ -81,7 +81,7 @@ impl DelayLineHeads {
         if index >= buffer_size {
             index - buffer_size
         } else if index < 0 as f32 {
-            index + buffer_size - (1 as f32)
+            index + (buffer_size - 1 as f32)
         } else {
             index
         }
@@ -91,7 +91,7 @@ impl DelayLineHeads {
         if index >= buffer_size {
             index - buffer_size
         } else if index < 0 as usize {
-            index + buffer_size - (1 as usize)
+            index + (buffer_size - 1 as usize)
         } else {
             index
         }
