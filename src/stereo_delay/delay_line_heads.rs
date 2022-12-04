@@ -77,14 +77,9 @@ impl DelayLineHeads {
         self.write_head
     }
 
-    fn bind_to_buffer_f32(index: f32, buffer_size: f32) -> f32 {
-        if index >= buffer_size {
-            index - buffer_size
-        } else if index < 0 as f32 {
-            index + (buffer_size - 1 as f32)
-        } else {
-            index
-        }
+    pub fn increment_pos(&self, pos: usize) -> usize {
+        let next_pos = pos + 1;
+        Self::bind_to_buffer_usize(next_pos, self.buffer_size)
     }
 
     pub fn bind_to_buffer_usize(index: usize, buffer_size: usize) -> usize {
@@ -92,6 +87,16 @@ impl DelayLineHeads {
             index - buffer_size
         } else if index < 0 as usize {
             index + (buffer_size - 1 as usize)
+        } else {
+            index
+        }
+    }
+
+    fn bind_to_buffer_f32(index: f32, buffer_size: f32) -> f32 {
+        if index >= buffer_size {
+            index - buffer_size
+        } else if index < 0 as f32 {
+            index + (buffer_size - 1 as f32)
         } else {
             index
         }
