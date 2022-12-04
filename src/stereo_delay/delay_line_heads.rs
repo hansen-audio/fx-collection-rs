@@ -69,11 +69,11 @@ impl DelayLineHeads {
         Self::bind_to_buffer_f32(diff, self.buffer_size_f)
     }
 
-    pub fn read_head(&self) -> f32 {
+    pub fn read_pos(&self) -> f32 {
         self.read_head
     }
 
-    pub fn write_head(&self) -> usize {
+    pub fn write_pos(&self) -> usize {
         self.write_head
     }
 
