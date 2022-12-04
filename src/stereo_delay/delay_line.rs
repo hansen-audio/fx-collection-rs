@@ -79,11 +79,11 @@ impl DelayLine {
     }
 
     fn read(&mut self, read_pos: f32) -> f32 {
-        let mut read_pos_usize = read_pos.floor() as usize;
-        let a = self.buffer[read_pos_usize];
+        let mut buf_pos = read_pos.floor() as usize;
+        let a = self.buffer[buf_pos];
 
-        read_pos_usize = self.heads.increment_pos(read_pos_usize);
-        let b = self.buffer[read_pos_usize];
+        buf_pos = self.heads.increment_pos(buf_pos);
+        let b = self.buffer[buf_pos];
 
         a + (b - a) * read_pos.fract()
     }
