@@ -243,6 +243,7 @@ mod tests {
         delay_line.set_lp_freq(22050.);
         delay_line.reset_heads();
         delay_line.clear_buffer();
+        delay_line.set_sample_rate(44100_f32);
 
         const TEST_BUF_SIZE: usize = 128;
         let mut test_output = Vec::new();
