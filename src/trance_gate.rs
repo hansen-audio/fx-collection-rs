@@ -271,10 +271,10 @@ impl TranceGate {
     }
 
     fn apply_contour(&mut self, left: &mut f32, right: &mut f32) {
-        let input = [*left, *right, 0., 0.];
-        let output = self.contour_filter.process(&input);
-        *left = output[Self::L];
-        *right = output[Self::R];
+        let mut outputs: AudioFrame = [*left, *right, 0., 0.];
+        self.contour_filter.process(&mut outputs);
+        *left = outputs[Self::L];
+        *right = outputs[Self::R];
     }
 
     fn compute_mix(&self) -> f32 {
