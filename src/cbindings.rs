@@ -140,7 +140,8 @@ pub unsafe extern "C" fn process_stereo_delay(
     inputs: &AudioFrame,
     outputs: &mut AudioFrame,
 ) {
-    stereo_delay.process(inputs, outputs);
+    outputs.copy_from_slice(inputs);
+    stereo_delay.process_stereo(outputs);
 }
 
 #[no_mangle]
