@@ -41,11 +41,11 @@ impl StereoDelay {
     }
 
     pub fn process_mono(&mut self, input: f32) -> f32 {
-        let mut output = self.read(self.heads[Self::L_CH].read_pos());
+        let mut output = self.read(Self::L_CH, self.heads[Self::L_CH].read_pos());
         output = self.filter(output);
 
         let value = input + output * self.feedbacks[Self::L_CH];
-        self.write(self.heads[Self::L_CH].write_pos(), value);
+        self.write(Self::L_CH, self.heads[Self::L_CH].write_pos(), value);
 
         self.heads[Self::L_CH].advance();
 
@@ -55,18 +55,18 @@ impl StereoDelay {
     pub fn process_stereo(&mut self, outputs: &mut AudioFrame) {
         let inputs = outputs.clone();
 
-        outputs[Self::L_CH] = self.read(self.heads[Self::L_CH].read_pos());
-        outputs[Self::R_CH] = self.read(self.heads[Self::R_CH].read_pos());
+        outputs[Self::L_CH] = self.read(Self::L_CH, self.heads[Self::L_CH].read_pos());
+        outputs[Self::R_CH] = self.read(Self::R_CH, self.heads[Self::R_CH].read_pos());
 
         self.filter_multi(outputs);
 
         let mut value_left = inputs[Self::L_CH];
         value_left += outputs[Self::L_CH] * self.feedbacks[Self::L_CH];
-        self.write(self.heads[Self::L_CH].write_pos(), value_left);
+        self.write(Self::L_CH, self.heads[Self::L_CH].write_pos(), value_left);
 
         let mut value_right = inputs[Self::R_CH];
         value_right += outputs[Self::R_CH] * self.feedbacks[Self::R_CH];
-        self.write(self.heads[Self::R_CH].write_pos(), value_right);
+        self.write(Self::R_CH, self.heads[Self::R_CH].write_pos(), value_right);
 
         for el in self.heads.iter_mut() {
             el.advance();
@@ -124,18 +124,18 @@ impl StereoDelay {
         self.lp.set_sample_rate(sample_rate);
     }
 
-    fn read(&self, read_pos: f32) -> f32 {
+    fn read(&self, ch: usize, read_pos: f32) -> f32 {
         let mut buf_pos = read_pos.floor() as usize;
-        let a = self.bufs[Self::L_CH][buf_pos];
+        let a = self.bufs[ch][buf_pos];
 
-        buf_pos = self.heads[Self::L_CH].increment_pos(buf_pos);
-        let b = self.bufs[Self::L_CH][buf_pos];
+        buf_pos = self.heads[ch].increment_pos(buf_pos);
+        let b = self.bufs[ch][buf_pos];
 
         a + (b - a) * read_pos.fract()
     }
 
-    fn write(&mut self, pos: usize, value: f32) {
-        self.bufs[Self::L_CH][pos] = value;
+    fn write(&mut self, ch: usize, pos: usize, value: f32) {
+        self.bufs[ch][pos] = value;
     }
 
     fn filter(&mut self, input: f32) -> f32 {
