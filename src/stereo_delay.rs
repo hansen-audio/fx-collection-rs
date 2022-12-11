@@ -155,8 +155,9 @@ mod tests {
     use crate::NUM_CHANNELS;
 
     use super::*;
+    const TEST_BUF_SIZE: usize = 128;
 
-    const RESULT_LEFT: [f32; 128] = [
+    const RESULT_LEFT: [f32; TEST_BUF_SIZE] = [
         0.0,
         0.0,
         0.0,
@@ -299,7 +300,6 @@ mod tests {
         delay_line.clear_buffer();
         delay_line.set_sample_rate(44100_f32);
 
-        const TEST_BUF_SIZE: usize = 128;
         let mut test_output = Vec::new();
 
         test_output.push(delay_line.process_mono(1.));
@@ -324,7 +324,6 @@ mod tests {
         delay_line.clear_buffer();
         delay_line.set_sample_rate(44100_f32);
 
-        const TEST_BUF_SIZE: usize = 128;
         let mut test_output = Vec::new();
 
         let mut outputs: AudioFrame = [1.; NUM_CHANNELS];
@@ -339,5 +338,164 @@ mod tests {
 
         //println!("{:#?}", test_output);
         assert_eq!(RESULT_LEFT.to_vec(), test_output);
+    }
+
+    #[test]
+    fn test_multi_delay_line_stereo_real_delay() {
+        const EXPECTED_RESULT: [f32; TEST_BUF_SIZE] = [
+            0.0,
+            0.0025263566,
+            -0.0025000102,
+            -3.2454103e-5,
+            5.9776103e-6,
+            1.4433031e-7,
+            -1.3596773e-8,
+            -5.06433e-10,
+            2.9069731e-11,
+            1.5826152e-12,
+            -5.693774e-14,
+            -4.592115e-15,
+            9.595908e-17,
+            1.2602286e-17,
+            -1.1100861e-19,
+            -3.2996228e-20,
+            -6.3649286e-23,
+            8.269829e-23,
+            1.0232274e-24,
+            -1.9825912e-25,
+            -4.6526485e-27,
+            4.5236377e-28,
+            1.6472002e-29,
+            -9.7107795e-31,
+            -5.174199e-32,
+            1.9137489e-33,
+            1.5067918e-34,
+            -3.2635526e-36,
+            -4.147118e-37,
+            3.920236e-39,
+            1.088614e-39,
+            1.449e-42,
+            0.0053685103,
+            -0.005298962,
+            -9.5807656e-5,
+            2.563533e-5,
+            7.1571e-7,
+            -8.861764e-8,
+            -3.580167e-9,
+            2.5682462e-10,
+            1.4598149e-11,
+            -6.44173e-13,
+            -5.2400684e-14,
+            1.362001e-15,
+            1.7175736e-16,
+            -2.0972974e-18,
+            -5.2405304e-19,
+            2.52335e-22,
+            1.5034041e-21,
+            1.5826487e-23,
+            -4.0716436e-24,
+            -8.900311e-26,
+            1.0397854e-26,
+            3.606993e-28,
+            -2.4847781e-29,
+            -1.2640444e-30,
+            5.452904e-32,
+            4.050207e-33,
+            -1.0499005e-34,
+            -1.2153827e-35,
+            1.5379538e-37,
+            3.455686e-38,
+            -4.3374e-41,
+            -9.3594e-41,
+            2.8820903e-5,
+            -5.696786e-5,
+            2.726627e-5,
+            1.0802397e-6,
+            -1.9140172e-7,
+            -9.043214e-9,
+            8.4577684e-10,
+            5.226606e-11,
+            -2.8921186e-12,
+            -2.440349e-13,
+            7.9386875e-15,
+            9.87947e-16,
+            -1.6143374e-17,
+            -3.5976537e-18,
+            1.1712486e-20,
+            1.2026037e-20,
+            1.0253992e-22,
+            -3.7299458e-23,
+            -7.548605e-25,
+            1.0774252e-25,
+            3.5643216e-27,
+            -2.889158e-28,
+            -1.4087729e-29,
+            7.096152e-31,
+            5.0070435e-32,
+            -1.5416142e-33,
+            -1.6488255e-34,
+            2.6736586e-36,
+            5.1051716e-37,
+            -2.070943e-39,
+            -1.497125e-39,
+            -1.0651e-41,
+            1.5472531e-7,
+            -4.5894416e-7,
+            4.4703458e-7,
+            -1.3475851e-7,
+            -9.361547e-9,
+            1.2218216e-9,
+            8.94821e-11,
+            -6.4136274e-12,
+            -5.8907084e-13,
+            2.4276588e-14,
+            3.094128e-15,
+            -6.638051e-17,
+            -1.3899763e-17,
+            9.0102e-20,
+            5.5433076e-20,
+            3.5213511e-22,
+            -2.0038593e-22,
+            -3.730101e-24,
+            6.635478e-25,
+            2.0974505e-26,
+            -2.016943e-27,
+            -9.471017e-29,
+            5.583357e-30,
+            3.769429e-31,
+            -1.3715665e-32,
+            -1.3724272e-33,
+            2.7729986e-35,
+            4.656027e-36,
+            -3.311461e-38,
+            -1.4860214e-38,
+            -6.8229e-41,
+            4.4812e-41,
+        ];
+        let mut delay_line = StereoDelay::new();
+        delay_line.set_buffer_size(32);
+        delay_line.set_normalized_delay_left(0.01);
+        delay_line.set_normalized_delay_right(0.02);
+        delay_line.set_feedback(1.);
+        delay_line.set_hp_freq(20.);
+        delay_line.set_lp_freq(22050.);
+        delay_line.reset_heads();
+        delay_line.clear_buffer();
+        delay_line.set_sample_rate(44100_f32);
+
+        const TEST_BUF_SIZE: usize = 128;
+        let mut test_output = Vec::new();
+
+        let mut outputs: AudioFrame = [1.; NUM_CHANNELS];
+        delay_line.process_stereo(&mut outputs);
+        test_output.push(outputs[StereoDelay::L_CH]);
+        for _ in 0..(TEST_BUF_SIZE - 1) {
+            outputs.copy_from_slice(&[0., 0., 0., 0.]);
+            delay_line.process_stereo(&mut outputs);
+            test_output.push(outputs[StereoDelay::L_CH]);
+        }
+
+        //println!("{:#?}", test_output);
+        assert_eq!(EXPECTED_RESULT.to_vec(), test_output);
     }
 }

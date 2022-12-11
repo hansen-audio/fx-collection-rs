@@ -11,6 +11,11 @@ pub(super) struct DelayLineHeads {
 }
 
 impl DelayLineHeads {
+    const ONE_SAMPLE: usize = 1;
+    const ONE_SAMPLE_F: f32 = 1.;
+    const SLOW_INCREMENT_F: f32 = 0.7;
+    const FAST_INCREMENT_F: f32 = 1.3;
+
     pub fn new() -> Self {
         Self {
             read_head: 0.,
@@ -23,13 +28,14 @@ impl DelayLineHeads {
     }
 
     pub fn advance(&mut self) {
-        let tmp_diff = (self.current_diff() - self.heads_diff_dst).abs();
-        self.write_head += 1;
-        self.read_head = if tmp_diff > 1. {
-            self.read_head + self.read_head_increment
-        } else {
-            self.write_head as f32 - self.heads_diff_dst
-        };
+        let diff = (self.current_diff() - self.heads_diff_dst).abs();
+
+        self.write_head += Self::ONE_SAMPLE;
+        self.read_head += self.read_head_increment;
+
+        if diff <= Self::ONE_SAMPLE_F {
+            self.read_head = self.write_head as f32 - self.heads_diff_dst;
+        }
 
         self.read_head = Self::bind_to_buffer_f32(self.read_head, self.buffer_size_f);
         self.write_head = Self::bind_to_buffer_usize(self.write_head, self.buffer_size);
@@ -37,7 +43,7 @@ impl DelayLineHeads {
 
     pub fn reset(&mut self) {
         self.read_head = self.write_head as f32 - self.heads_diff_dst;
-        self.read_head_increment = 1.;
+        self.read_head_increment = Self::ONE_SAMPLE_F;
         self.read_head = Self::bind_to_buffer_f32(self.read_head, self.buffer_size_f);
     }
 
@@ -52,10 +58,11 @@ impl DelayLineHeads {
 
     fn calc_read_head_increment(&mut self, diff: f32) {
         self.heads_diff_dst = self.calc_read_head_offset(diff);
+
         self.read_head_increment = if self.current_diff() < self.heads_diff_dst {
-            0.7
+            Self::SLOW_INCREMENT_F
         } else {
-            1.3
+            Self::FAST_INCREMENT_F
         };
     }
 
@@ -78,7 +85,7 @@ impl DelayLineHeads {
     }
 
     pub fn increment_pos(&self, pos: usize) -> usize {
-        let next_pos = pos + 1;
+        let next_pos = pos + Self::ONE_SAMPLE;
         Self::bind_to_buffer_usize(next_pos, self.buffer_size)
     }
 
