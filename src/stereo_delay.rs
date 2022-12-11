@@ -19,12 +19,14 @@ pub struct StereoDelay {
 }
 
 impl StereoDelay {
-    const L_CH: usize = 0;
-    const R_CH: usize = 1;
+    const LC: usize = 0;
+    const RC: usize = 1;
 
     pub fn new() -> Self {
+        const DEFAULT_BUF_SIZE: usize = 8000;
+
         let mut delay_line = Self {
-            bufs: vec![vec![0_f32; 8000]; NUM_STEREO_DELAY_CHANNELS],
+            bufs: vec![vec![0_f32; DEFAULT_BUF_SIZE]; NUM_STEREO_DELAY_CHANNELS],
             feedbacks: [0.75; NUM_STEREO_DELAY_CHANNELS],
             heads: [DelayLineHeads::new(); NUM_STEREO_DELAY_CHANNELS],
             hp: OnePole::new(),
@@ -34,20 +36,20 @@ impl StereoDelay {
         delay_line.hp.set_filter_type(OnePoleType::HP);
         delay_line.lp.set_filter_type(OnePoleType::LP);
         for el in delay_line.heads.iter_mut() {
-            el.set_buffer_size(8000);
+            el.set_buffer_size(DEFAULT_BUF_SIZE);
         }
 
         delay_line
     }
 
     pub fn process_mono(&mut self, input: f32) -> f32 {
-        let mut output = self.read(Self::L_CH, self.heads[Self::L_CH].read_pos());
+        let mut output = self.read(Self::LC, self.heads[Self::LC].read_pos());
         output = self.filter(output);
 
-        let value = input + output * self.feedbacks[Self::L_CH];
-        self.write(Self::L_CH, self.heads[Self::L_CH].write_pos(), value);
+        let value = input + output * self.feedbacks[Self::LC];
+        self.write(Self::LC, self.heads[Self::LC].write_pos(), value);
 
-        self.heads[Self::L_CH].advance();
+        self.heads[Self::LC].advance();
 
         output
     }
@@ -55,18 +57,18 @@ impl StereoDelay {
     pub fn process_stereo(&mut self, outputs: &mut AudioFrame) {
         let inputs = outputs.clone();
 
-        outputs[Self::L_CH] = self.read(Self::L_CH, self.heads[Self::L_CH].read_pos());
-        outputs[Self::R_CH] = self.read(Self::R_CH, self.heads[Self::R_CH].read_pos());
+        outputs[Self::LC] = self.read(Self::LC, self.heads[Self::LC].read_pos());
+        outputs[Self::RC] = self.read(Self::RC, self.heads[Self::RC].read_pos());
 
         self.filter_multi(outputs);
 
-        let mut value_left = inputs[Self::L_CH];
-        value_left += outputs[Self::L_CH] * self.feedbacks[Self::L_CH];
-        self.write(Self::L_CH, self.heads[Self::L_CH].write_pos(), value_left);
+        let mut value_left = inputs[Self::LC];
+        value_left += outputs[Self::LC] * self.feedbacks[Self::LC];
+        self.write(Self::LC, self.heads[Self::LC].write_pos(), value_left);
 
-        let mut value_right = inputs[Self::R_CH];
-        value_right += outputs[Self::R_CH] * self.feedbacks[Self::R_CH];
-        self.write(Self::R_CH, self.heads[Self::R_CH].write_pos(), value_right);
+        let mut value_right = inputs[Self::RC];
+        value_right += outputs[Self::RC] * self.feedbacks[Self::RC];
+        self.write(Self::RC, self.heads[Self::RC].write_pos(), value_right);
 
         for el in self.heads.iter_mut() {
             el.advance();
@@ -74,11 +76,11 @@ impl StereoDelay {
     }
 
     pub fn set_normalized_delay_left(&mut self, speed: f32) {
-        self.heads[Self::L_CH].set_heads_diff(speed);
+        self.heads[Self::LC].set_heads_diff(speed);
     }
 
     pub fn set_normalized_delay_right(&mut self, speed: f32) {
-        self.heads[Self::R_CH].set_heads_diff(speed);
+        self.heads[Self::RC].set_heads_diff(speed);
     }
 
     pub fn set_feedback(&mut self, feedback: f32) {
@@ -328,12 +330,12 @@ mod tests {
 
         let mut outputs: AudioFrame = [1.; NUM_CHANNELS];
         delay_line.process_stereo(&mut outputs);
-        test_output.push(outputs[StereoDelay::L_CH]);
+        test_output.push(outputs[StereoDelay::LC]);
         for _ in 0..(TEST_BUF_SIZE - 1) {
             outputs.copy_from_slice(&[0., 0., 0., 0.]);
             delay_line.process_stereo(&mut outputs);
-            assert_eq!(outputs[StereoDelay::L_CH], outputs[StereoDelay::R_CH]);
-            test_output.push(outputs[StereoDelay::L_CH]);
+            assert_eq!(outputs[StereoDelay::LC], outputs[StereoDelay::RC]);
+            test_output.push(outputs[StereoDelay::LC]);
         }
 
         //println!("{:#?}", test_output);
@@ -488,11 +490,11 @@ mod tests {
 
         let mut outputs: AudioFrame = [1.; NUM_CHANNELS];
         delay_line.process_stereo(&mut outputs);
-        test_output.push(outputs[StereoDelay::L_CH]);
+        test_output.push(outputs[StereoDelay::LC]);
         for _ in 0..(TEST_BUF_SIZE - 1) {
             outputs.copy_from_slice(&[0., 0., 0., 0.]);
             delay_line.process_stereo(&mut outputs);
-            test_output.push(outputs[StereoDelay::L_CH]);
+            test_output.push(outputs[StereoDelay::LC]);
         }
 
         //println!("{:#?}", test_output);

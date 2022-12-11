@@ -35,10 +35,11 @@ pub struct TranceGate {
 }
 
 impl TranceGate {
-    const L: usize = 0;
-    const R: usize = 1;
+    const LC: usize = 0;
+    const RC: usize = 1;
     const MIN_NUM_STEPS: usize = 1;
     const ONE_SAMPLE: usize = 1;
+    const DEFAULT_TEMPO_BPM: f32 = 120.;
 
     pub fn new() -> Self {
         use filtering::one_pole_simple::OnePoleSimpleMulti;
@@ -65,27 +66,26 @@ impl TranceGate {
             is_fade_in_active: false,
         };
 
-        const INIT_NOTE_LEN: f32 = 1. / 32.;
+        const DEFAULT_NOTE_LEN: f32 = 1. / 32.;
 
         trance_gate
             .delay_phase
-            .set_rate(Phase::note_len_to_rate(INIT_NOTE_LEN));
+            .set_rate(Phase::note_len_to_rate(DEFAULT_NOTE_LEN));
         trance_gate.delay_phase.set_sync_mode(SyncMode::ProjectSync);
 
         trance_gate
             .fade_in_phase
-            .set_rate(Phase::note_len_to_rate(INIT_NOTE_LEN));
+            .set_rate(Phase::note_len_to_rate(DEFAULT_NOTE_LEN));
         trance_gate
             .fade_in_phase
             .set_sync_mode(SyncMode::ProjectSync);
 
         trance_gate
             .step_phase
-            .set_rate(Phase::note_len_to_rate(INIT_NOTE_LEN));
+            .set_rate(Phase::note_len_to_rate(DEFAULT_NOTE_LEN));
         trance_gate.step_phase.set_sync_mode(SyncMode::ProjectSync);
 
-        const TEMPO_BPM: f32 = 120.;
-        trance_gate.set_tempo(TEMPO_BPM);
+        trance_gate.set_tempo(Self::DEFAULT_TEMPO_BPM);
 
         trance_gate
     }
@@ -134,13 +134,13 @@ impl TranceGate {
         }
 
         let pos = self.step_val.pos();
-        let mut left = self.channel_steps_list[Self::L][pos];
+        let mut left = self.channel_steps_list[Self::LC][pos];
         let mut right = self.channel_steps_list[self.ch][pos];
 
         self.apply_effect(&mut left, &mut right);
 
-        outputs[Self::L] = inputs[Self::L] * left;
-        outputs[Self::R] = inputs[Self::R] * right;
+        outputs[Self::LC] = inputs[Self::LC] * left;
+        outputs[Self::RC] = inputs[Self::RC] * right;
 
         self.update_phases()
     }
@@ -184,8 +184,8 @@ impl TranceGate {
 
     pub fn set_stereo_mode(&mut self, mode: bool) {
         self.ch = match mode {
-            true => Self::R,
-            false => Self::L,
+            true => Self::RC,
+            false => Self::LC,
         }
     }
 
@@ -273,8 +273,8 @@ impl TranceGate {
     fn apply_contour(&mut self, left: &mut f32, right: &mut f32) {
         let mut outputs: AudioFrame = [*left, *right, 0., 0.];
         self.contour_filter.process(&mut outputs);
-        *left = outputs[Self::L];
-        *right = outputs[Self::R];
+        *left = outputs[Self::LC];
+        *right = outputs[Self::RC];
     }
 
     fn compute_mix(&self) -> f32 {
