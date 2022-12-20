@@ -1,19 +1,17 @@
 // Copyright(c) 2021 Hansen Audio.
 
-use crate::AudioFrame;
+use crate::{AudioFrame, NUM_STEREO_CHANNELS};
 
 mod delay_line_heads;
 use delay_line_heads::DelayLineHeads;
 use dsp_tool_box_rs::filtering::one_pole::OnePole;
 use dsp_tool_box_rs::filtering::one_pole::OnePoleType;
 
-const NUM_STEREO_DELAY_CHANNELS: usize = 2;
-
 #[derive(Clone)]
 pub struct StereoDelay {
     bufs: Vec<Vec<f32>>,
-    feedbacks: [f32; NUM_STEREO_DELAY_CHANNELS],
-    heads: [DelayLineHeads; NUM_STEREO_DELAY_CHANNELS],
+    feedbacks: [f32; NUM_STEREO_CHANNELS],
+    heads: [DelayLineHeads; NUM_STEREO_CHANNELS],
     hp: OnePole,
     lp: OnePole,
 }
@@ -26,9 +24,9 @@ impl StereoDelay {
         const DEFAULT_BUF_SIZE: usize = 8000;
 
         let mut delay_line = Self {
-            bufs: vec![vec![0_f32; DEFAULT_BUF_SIZE]; NUM_STEREO_DELAY_CHANNELS],
-            feedbacks: [0.75; NUM_STEREO_DELAY_CHANNELS],
-            heads: [DelayLineHeads::new(); NUM_STEREO_DELAY_CHANNELS],
+            bufs: vec![vec![0_f32; DEFAULT_BUF_SIZE]; NUM_STEREO_CHANNELS],
+            feedbacks: [0.75; NUM_STEREO_CHANNELS],
+            heads: [DelayLineHeads::new(); NUM_STEREO_CHANNELS],
             hp: OnePole::new(),
             lp: OnePole::new(),
         };
@@ -154,7 +152,7 @@ impl StereoDelay {
 
 #[cfg(test)]
 mod tests {
-    use crate::NUM_CHANNELS;
+    use crate::{DEFAULT_SAMPLE_RATE, NUM_CHANNELS};
 
     use super::*;
     const TEST_BUF_SIZE: usize = 128;
@@ -324,7 +322,7 @@ mod tests {
         delay_line.set_lp_freq(22050.);
         delay_line.reset_heads();
         delay_line.clear_buffer();
-        delay_line.set_sample_rate(44100_f32);
+        delay_line.set_sample_rate(DEFAULT_SAMPLE_RATE);
 
         let mut test_output = Vec::new();
 
@@ -483,7 +481,7 @@ mod tests {
         delay_line.set_lp_freq(22050.);
         delay_line.reset_heads();
         delay_line.clear_buffer();
-        delay_line.set_sample_rate(44100_f32);
+        delay_line.set_sample_rate(DEFAULT_SAMPLE_RATE);
 
         const TEST_BUF_SIZE: usize = 128;
         let mut test_output = Vec::new();

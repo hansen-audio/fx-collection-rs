@@ -6,12 +6,11 @@ use dsp_tool_box_rs::modulation;
 mod shuffle_note;
 mod step;
 
-use crate::AudioFrame;
-use crate::NUM_CHANNELS;
+use crate::{AudioFrame, DEFAULT_SAMPLE_RATE, DEFAULT_TEMPO_BPM, NUM_STEREO_CHANNELS};
 
 const MAX_NUM_STEPS: usize = 32;
 type StepVals = [f32; MAX_NUM_STEPS];
-type ChannelStepsList = [StepVals; NUM_CHANNELS];
+type ChannelStepsList = [StepVals; NUM_STEREO_CHANNELS];
 
 #[derive(Debug, Clone)]
 pub struct TranceGate {
@@ -39,7 +38,6 @@ impl TranceGate {
     const RC: usize = 1;
     const MIN_NUM_STEPS: usize = 1;
     const ONE_SAMPLE: usize = 1;
-    const DEFAULT_TEMPO_BPM: f32 = 120.;
 
     pub fn new() -> Self {
         use filtering::one_pole_simple::OnePoleSimpleMulti;
@@ -47,7 +45,7 @@ impl TranceGate {
         use modulation::phase::SyncMode;
 
         let mut trance_gate = Self {
-            channel_steps_list: [[0.; MAX_NUM_STEPS]; NUM_CHANNELS],
+            channel_steps_list: [[0.; MAX_NUM_STEPS]; NUM_STEREO_CHANNELS],
             contour_filter: OnePoleSimpleMulti::new(0.),
             delay_phase: modulation::phase::Phase::new(),
             fade_in_phase: modulation::phase::Phase::new(),
@@ -60,7 +58,7 @@ impl TranceGate {
             width: 0.,
             shuffle: 0.,
             contour: 0.01,
-            sample_rate: 44100.,
+            sample_rate: DEFAULT_SAMPLE_RATE,
             ch: 0,
             is_delay_active: false,
             is_fade_in_active: false,
@@ -85,7 +83,7 @@ impl TranceGate {
             .set_rate(Phase::note_len_to_rate(DEFAULT_NOTE_LEN));
         trance_gate.step_phase.set_sync_mode(SyncMode::ProjectSync);
 
-        trance_gate.set_tempo(Self::DEFAULT_TEMPO_BPM);
+        trance_gate.set_tempo(DEFAULT_TEMPO_BPM);
 
         trance_gate
     }
