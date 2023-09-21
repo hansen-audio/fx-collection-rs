@@ -264,8 +264,8 @@ impl TranceGate {
     }
 
     fn apply_width(&self, left: &mut f32, right: &mut f32) {
-        *left = left.max(*left * self.width);
-        *right = right.max(*right * self.width);
+        *left = left.max(*right * self.width);
+        *right = right.max(*left * self.width);
     }
 
     fn apply_contour(&mut self, left: &mut f32, right: &mut f32) {
