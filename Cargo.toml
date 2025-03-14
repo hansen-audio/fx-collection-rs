@@ -1,5 +1,5 @@
 [package]
-name = "fx-collection-rs"
+name = "fx_collection_rs"
 version = "0.1.0"
 authors = ["René Hansen <rene@hansen-audio.de>"]
 edition = "2021"
