@@ -8,5 +8,5 @@ fn main() {
 
     cbindgen::generate(&crate_dir)
         .unwrap()
-        .write_to_file("include/ha/fx-collection-rs/cbindings.h");
+        .write_to_file("include/hao/fx-collection-rs/cbindings.h");
 }

@@ -28,7 +28,7 @@ cargo test
 
 This library uses ```cbindgen``` to generate a C++ header. Like this the library can be used in C++ projects as well.
 
-> See ```Cargo.toml```, ```cbindgen.toml``` and ```build.rs``` to understand how to generate the ```include/ha/fx-collection-rs/cbindings.h``` header file.
+> See ```Cargo.toml```, ```cbindgen.toml``` and ```build.rs``` to understand how to generate the ```include/hao/fx-collection-rs/cbindings.h``` header file.
 
 ## Effects
 
