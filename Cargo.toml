@@ -22,4 +22,4 @@ panic = "abort"   # Abort on panic
 # opt-level = "z"   # Optimize for size.
 
 [dependencies]
-dsp-tool-box-rs = { git = "https://github.com/hansen-audio/dsp-tool-box-rs.git", branch = "main" }
+dsp_tool_box_rs = { git = "https://github.com/hansen-audio/dsp-tool-box-rs.git", branch = "main" }
